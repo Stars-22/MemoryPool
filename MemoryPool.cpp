@@ -2,6 +2,8 @@
 // Created by stars on 2025/9/4.
 //
 
+#include <cassert>
+#include <cstring>
 #include "MemoryPool.h"
 
 namespace MemoryPool
