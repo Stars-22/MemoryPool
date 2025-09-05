@@ -38,6 +38,11 @@ namespace MemoryPool
 
     void* ThreadCache::allocate(size_t objSize)
     {
+        // 如果大于最大内存池大小，则直接从PageCache中分配
+        if (objSize > MAX_SLOTSIZE)
+        {
+            return allocateFromPageCache(objSize);
+        }
         // 计算需要的槽大小，通过将类型T的大小向上取整到8的倍数并除以8
         size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
         size_t slotSize = (slotNum + 1) * ALIGN;
@@ -66,20 +71,24 @@ namespace MemoryPool
 
     void ThreadCache::deallocate(void* ptr, size_t objSize)
     {
+        // 如果大于最大内存池大小，则直接释放到PageCache中
+        if (objSize > MAX_SLOTSIZE)
+        {
+            deallocateToPageCache(ptr, objSize);
+        }
         assert(ptr != nullptr && "ptr is nullptr");
         // 计算槽大小，通过将对象大小向上取整到8的倍数并除以8
         size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
-        char* ptr_ = (char*)ptr;
         MemoryPools* pools = getCache()->pools[slotNum];
         // 查找所在的内存池
-        auto it = pools->poolsmap.lower_bound(ptr_);
+        auto it = pools->poolsmap.lower_bound((char*)ptr);
         assert(it != pools->poolsmap.end() && "pool is nullptr");
         // 将对象指针返回给内存池
         MemoryPool* pool = it->second;
         if (pool->deallocate(ptr))
         {
             // 如果内存池已已清空，则释放此内存池
-            deallocatePool(pool);
+            deallocatePool((void*)pool->getFirstPtr(), pool->getPoolSize());
             if (pool != pools->firstPool)
             {
                 pool->prevPool->nextPool = pool->nextPool;
@@ -96,10 +105,11 @@ namespace MemoryPool
 
     MemoryPool* ThreadCache::allocatePool(size_t slotSize)
     {
-        size_t slotNum = slotSize / ALIGN - 1;
         char* slot = static_cast<char*>(std::malloc(slotSize * EACHPOOL_SLOT_NUM));
+        //char* slot = CenterCache::getCache()->allocate(slotSize * EACHPOOL_SLOT_NUM);
         if (slot == nullptr) return nullptr;
         MemoryPool* pool = new MemoryPool(slot, slotSize * EACHPOOL_SLOT_NUM, slotSize);
+        size_t slotNum = slotSize / ALIGN - 1;
         MemoryPool* temp = getCache()->pools[slotNum]->firstPool;
         if (temp == nullptr)
         {
@@ -118,7 +128,18 @@ namespace MemoryPool
         return pool;
     }
 
-    void ThreadCache::deallocatePool(MemoryPool* pool)
+    void ThreadCache::deallocatePool(void* ptr, size_t objSize)
     {
+        //CenterCache::getCache()->deallocate(ptr, objSize);
+    }
+
+    void* ThreadCache::allocateFromPageCache(size_t objSize)
+    {
+        //return PageCache::getCache()->allocate(objSize);
+    }
+
+    void ThreadCache::deallocateToPageCache(void* ptr, size_t objSize)
+    {
+        //PageCache::getCache()->deallocate(ptr, objSize);
     }
 } // MemoryPool

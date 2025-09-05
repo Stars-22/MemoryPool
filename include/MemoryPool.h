@@ -38,6 +38,10 @@ namespace MemoryPool
         void* allocate();
 
         bool deallocate(void* ptr);
+
+        void* getFirstPtr() const;
+
+        size_t getPoolSize() const;
     };
 } // MemoryPool
 

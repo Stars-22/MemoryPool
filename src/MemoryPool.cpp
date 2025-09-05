@@ -77,4 +77,8 @@ namespace MemoryPool
         freeSlot = (Slot*)ptr;
         return usedAmount == 0;
     }
+
+    void* MemoryPool::getFirstPtr() const { return firstPtr; }
+
+    size_t MemoryPool::getPoolSize() const { return poolSize; }
 } // MemoryPool
