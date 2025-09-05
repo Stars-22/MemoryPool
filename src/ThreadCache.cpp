@@ -4,7 +4,7 @@
 
 #include <cstdlib>
 #include <cassert>
-#include "ThreadCache.h"
+#include "../include/ThreadCache.h"
 
 namespace MemoryPool
 {
@@ -59,7 +59,6 @@ namespace MemoryPool
         assert(ptr != nullptr && "ptr is nullptr");
         // 计算槽大小，通过将对象大小向上取整到8的倍数并除以8
         size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
-        size_t slotSize = (slotNum + 1) * ALIGN;
         char* ptr_ = (char*)ptr;
         MemoryPools* pools = getCache()->pools[slotNum];
         // 查找所在的内存池
