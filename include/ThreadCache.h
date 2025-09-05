@@ -22,7 +22,7 @@ namespace MemoryPool
          */
         struct MemoryPools
         {
-            std::map<char*, MemoryPool*> poolsmap;  // 存储内存池的映射表，键为内存地址，值为内存池指针
+            std::map<char*, MemoryPool*> poolsMap;  // 存储内存池的映射表，键为内存地址，值为内存池指针
             MemoryPool* firstPool;                  // 指向第一个内存池的指针
 
             /**
@@ -37,17 +37,19 @@ namespace MemoryPool
              */
             ~MemoryPools()
             {
-                for (auto& pair : poolsmap)
+                for (auto& pair : poolsMap)
                 {
+                    // @TODO 此处是测试ThreadCache代码
+                    deallocatePool(pair.second->getFirstPtr(), pair.second->getPoolSize());
                     delete pair.second;  // 删除内存池
                 }
-                poolsmap.clear();      // 清空映射表
+                poolsMap.clear();      // 清空映射表
                 firstPool = nullptr;   // 重置指针
             }
         };
 
         static thread_local ThreadCache* cache;  // 线程本地的ThreadCache指针
-        std::array<MemoryPools*, MAX_SLOTSIZE / ALIGN> pools;  // 内存池数组，按大小分类存储
+        std::array<MemoryPools*, MAX_SLOT_SIZE / ALIGN> pools;  // 内存池数组，按大小分类存储
         ThreadCache();  // 私有构造函数
 
         /**
@@ -59,7 +61,8 @@ namespace MemoryPool
 
         /**
          * @brief 释放内存池
-         * @param pool 要释放的内存池指针
+         * @param ptr 要释放的内存地址
+         * @param objSize 要释放的内存大小
          */
         static void deallocatePool(void* ptr, size_t objSize);
 

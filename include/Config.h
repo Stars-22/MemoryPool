@@ -7,9 +7,9 @@
 
 namespace MemoryPool
 {
-    const size_t ALIGN = 8; //内存池对齐值
-    const size_t MAX_SLOTSIZE = 512; //内存池中最大块大小
-    const size_t EACHPOOL_SLOT_NUM = 10; //每个内存池中块的数量
+    constexpr size_t ALIGN = 8; //内存池对齐值
+    constexpr size_t MAX_SLOT_SIZE = 512; //内存池中最大块大小
+    constexpr size_t EACH_POOL_SLOT_NUM = 10; //每个内存池中块的数量
 }
 
 #endif // MEMORYPOOL_CONFIG_H

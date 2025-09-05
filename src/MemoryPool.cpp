@@ -26,10 +26,6 @@ namespace MemoryPool
         usedAmount = 0;
     }
 
-    MemoryPool::~MemoryPool()
-    {
-    }
-
     /**
      * 从内存池中分配一块内存空间
      * @return 指向分配的内存空间的指针，如果内存池已满则返回nullptr
@@ -47,7 +43,7 @@ namespace MemoryPool
             return ptr;
         }
         // 从未被使用的地址获取内存
-        if (curPtr < lastPtr)
+        if (curPtr <= lastPtr)
         {
             void* ptr = curPtr;
             curPtr += slotSize;
@@ -69,12 +65,12 @@ namespace MemoryPool
         // 检查指针是否在分配的内存范围内
         assert(ptr >= firstPtr && ptr < lastPtr && "Pointer out of range");
         // 检查指针是否对齐到槽大小(slot size)
-        assert(((char*)ptr - firstPtr) % slotSize == 0 && "Pointer not aligned to slot size");
+        assert((static_cast<char*>(ptr) - firstPtr) % slotSize == 0 && "Pointer not aligned to slot size");
         // 检查是否有已使用的槽位
         assert(usedAmount > 0 && "No slots used");
         usedAmount--;
-        ((Slot*)ptr)->next = freeSlot;
-        freeSlot = (Slot*)ptr;
+        static_cast<Slot*>(ptr)->next = freeSlot;
+        freeSlot = static_cast<Slot*>(ptr);
         return usedAmount == 0;
     }
 

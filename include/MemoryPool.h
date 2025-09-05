@@ -4,7 +4,6 @@
 
 #ifndef MEMORYPOOL_MEMORYPOOL_H
 #define MEMORYPOOL_MEMORYPOOL_H
-#include <cstddef>
 
 namespace MemoryPool
 {
@@ -33,15 +32,15 @@ namespace MemoryPool
 
         MemoryPool(char* memoryBlock, size_t poolSize, size_t slotSize);
 
-        ~MemoryPool();
+        ~MemoryPool() = default;
 
         void* allocate();
 
         bool deallocate(void* ptr);
 
-        void* getFirstPtr() const;
+        [[nodiscard]] void* getFirstPtr() const;
 
-        size_t getPoolSize() const;
+        [[nodiscard]] size_t getPoolSize() const;
     };
 } // MemoryPool
 

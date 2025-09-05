@@ -11,6 +11,7 @@ namespace MemoryPool
     thread_local ThreadCache* ThreadCache::cache = nullptr;
 
     ThreadCache::ThreadCache()
+        : pools{}
     {
         for (auto& poolGroup : pools)
         {
@@ -39,7 +40,7 @@ namespace MemoryPool
     void* ThreadCache::allocate(size_t objSize)
     {
         // 如果大于最大内存池大小，则直接从PageCache中分配
-        if (objSize > MAX_SLOTSIZE)
+        if (objSize > MAX_SLOT_SIZE)
         {
             return allocateFromPageCache(objSize);
         }
@@ -57,12 +58,13 @@ namespace MemoryPool
             // 如果当前内存池分配失败，则尝试后续的内存池
             while (pool->nextPool != nullptr)
             {
-                if ((obj = pool->allocate()) != nullptr) return obj;
                 pool = pool->nextPool;
+                if ((obj = pool->allocate()) != nullptr) return obj;
             }
         }
         // 如果所有现有内存池都分配失败，则请求一个新的内存池
         pool = allocatePool(slotSize);
+        assert(pool != nullptr && "Failed to allocate pool");
         // 尝试从新分配的内存池中分配空间
         if ((obj = pool->allocate()) != nullptr) return obj;
         // 如果所有尝试都失败，返回nullptr
@@ -72,7 +74,7 @@ namespace MemoryPool
     void ThreadCache::deallocate(void* ptr, size_t objSize)
     {
         // 如果大于最大内存池大小，则直接释放到PageCache中
-        if (objSize > MAX_SLOTSIZE)
+        if (objSize > MAX_SLOT_SIZE)
         {
             deallocateToPageCache(ptr, objSize);
         }
@@ -81,14 +83,14 @@ namespace MemoryPool
         size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
         MemoryPools* pools = getCache()->pools[slotNum];
         // 查找所在的内存池
-        auto it = pools->poolsmap.lower_bound((char*)ptr);
-        assert(it != pools->poolsmap.end() && "pool is nullptr");
+        auto it = pools->poolsMap.lower_bound(static_cast<char*>(ptr));
+        assert(it != pools->poolsMap.end() && "pool is nullptr");
         // 将对象指针返回给内存池
         MemoryPool* pool = it->second;
         if (pool->deallocate(ptr))
         {
             // 如果内存池已已清空，则释放此内存池
-            deallocatePool((void*)pool->getFirstPtr(), pool->getPoolSize());
+            deallocatePool(pool->getFirstPtr(), pool->getPoolSize());
             if (pool != pools->firstPool)
             {
                 pool->prevPool->nextPool = pool->nextPool;
@@ -99,19 +101,19 @@ namespace MemoryPool
                 pools->firstPool = pool->nextPool;
             }
             // 从映射中移除
-            pools->poolsmap.erase(it);
+            pools->poolsMap.erase(it);
+            delete pool;
         }
     }
 
     MemoryPool* ThreadCache::allocatePool(size_t slotSize)
     {
-        char* slot = static_cast<char*>(std::malloc(slotSize * EACHPOOL_SLOT_NUM));
+        char* slot = static_cast<char*>(std::malloc(slotSize * EACH_POOL_SLOT_NUM));
         //char* slot = CenterCache::getCache()->allocate(slotSize * EACHPOOL_SLOT_NUM);
         if (slot == nullptr) return nullptr;
-        MemoryPool* pool = new MemoryPool(slot, slotSize * EACHPOOL_SLOT_NUM, slotSize);
-        size_t slotNum = slotSize / ALIGN - 1;
-        MemoryPool* temp = getCache()->pools[slotNum]->firstPool;
-        if (temp == nullptr)
+        const auto pool = new MemoryPool(slot, slotSize * EACH_POOL_SLOT_NUM, slotSize);
+        const size_t slotNum = slotSize / ALIGN - 1;
+        if (auto temp = getCache()->pools[slotNum]->firstPool; temp == nullptr)
         {
             getCache()->pools[slotNum]->firstPool = pool;
         }
@@ -124,13 +126,14 @@ namespace MemoryPool
             temp->nextPool = pool;
             pool->prevPool = temp;
         }
-        getCache()->pools[slotNum]->poolsmap[slot] = pool;
+        getCache()->pools[slotNum]->poolsMap[slot] = pool;
         return pool;
     }
 
     void ThreadCache::deallocatePool(void* ptr, size_t objSize)
     {
         //CenterCache::getCache()->deallocate(ptr, objSize);
+        std::free(ptr);
     }
 
     void* ThreadCache::allocateFromPageCache(size_t objSize)
