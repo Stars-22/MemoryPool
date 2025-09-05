@@ -18,13 +18,13 @@ namespace MemoryPool
     class MemoryPool
     {
     private:
-        size_t poolSize;        // 内存池大小
-        size_t slotSize;        // 每个块的大小
-        size_t slotAmount;      // 块的数量
         char* firstPtr;         // 第一个块的地址
         char* lastPtr;          // 最后一个块的地址
         Slot* freeSlot;         // 被释放的块的链表
         char* curPtr;           // 第一个未被使用的块的地址
+        size_t poolSize;        // 内存池大小
+        size_t slotSize;        // 每个块的大小
+        size_t slotAmount;      // 块的数量
         size_t usedAmount;      // 已经使用的块的数量
     public:
         MemoryPool* nextPool;   // 向下一个内存池的指针

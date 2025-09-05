@@ -1,5 +1,5 @@
 #include <iostream>
-#include "allocate.h"
+#include "../include/allocate.h"
 
 struct S1 {
     int a;
