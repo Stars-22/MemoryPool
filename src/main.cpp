@@ -1,14 +1,23 @@
 #include <iostream>
 #include "../include/allocate.h"
 
-struct S1 {
+struct S1
+{
     int a;
     int b;
     int c;
-    S1(int a, int b, int c) : a(a), b(b), c(c) {}
-    S1() {}
+
+    S1(int a, int b, int c) : a(a), b(b), c(c)
+    {
+    }
+
+    S1()
+    {
+    }
 };
-std::ostream& operator<<(std::ostream& os, const S1& s) {
+
+std::ostream& operator<<(std::ostream& os, const S1& s)
+{
     os << "S{a='" << s.a << "', b=" << s.b << ", c=" << s.c << "}";
     return os;
 }
@@ -31,9 +40,8 @@ int main()
     std::cout << sizeof(*b) << std::endl;
     std::cout << *b << std::endl;
 
-    std::cout << a << " " << c <<" " << b << std::endl;
+    std::cout << a << " " << c << " " << b << std::endl;
     std::cout << (char*)c - (char*)a << std::endl;
 
     return 0;
-    
 }

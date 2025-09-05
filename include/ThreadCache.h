@@ -14,21 +14,30 @@ namespace MemoryPool
     class ThreadCache
     {
     private:
-        struct MemoryPools{
+        struct MemoryPools
+        {
             std::map<char*, MemoryPool*> poolsmap;
             MemoryPool* firstPool;
-            MemoryPools() : firstPool(nullptr) {}
-            ~MemoryPools(){
-                for (auto& pair : poolsmap) {
+
+            MemoryPools() : firstPool(nullptr)
+            {
+            }
+
+            ~MemoryPools()
+            {
+                for (auto& pair : poolsmap)
+                {
                     delete pair.second;
                 }
                 poolsmap.clear();
                 firstPool = nullptr;
             }
         };
+
         static thread_local ThreadCache* cache;
-        std::array<MemoryPools*, MAX_SLOTSIZE/ALIGN> pools;
+        std::array<MemoryPools*, MAX_SLOTSIZE / ALIGN> pools;
         ThreadCache();
+
     public:
         ThreadCache(const ThreadCache&) = delete;
         ThreadCache& operator=(const ThreadCache&) = delete;
