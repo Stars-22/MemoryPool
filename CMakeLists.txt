@@ -8,4 +8,5 @@ add_executable(MemoryPool main.cpp
         MemoryPool.cpp
         MemoryPool.h
         Config.h
+        allocate.h
 )

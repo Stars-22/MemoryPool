@@ -1,10 +1,12 @@
 #include <iostream>
-#include "ThreadCache.h"
+#include "allocate.h"
 
 struct S1 {
     int a;
     int b;
     int c;
+    S1(int a, int b, int c) : a(a), b(b), c(c) {}
+    S1() {}
 };
 std::ostream& operator<<(std::ostream& os, const S1& s) {
     os << "S{a='" << s.a << "', b=" << s.b << ", c=" << s.c << "}";
@@ -14,18 +16,18 @@ std::ostream& operator<<(std::ostream& os, const S1& s) {
 int main()
 {
     using namespace MemoryPool;
-    int* a = ThreadCache::allocate<int>();
-    *a = 100000000;
+    int* a = allocate<int>(100000000);
+    //*a = 100000000;
     std::cout << *a << std::endl;
 
-    int* c = ThreadCache::allocate<int>();
+    int* c = allocate<int>();
     *c = 10;
     std::cout << *c << std::endl;
 
-    S1* b = ThreadCache::allocate<S1>();
-    b->a = 100;
-    b->b = 101;
-    b->c = 102;
+    S1* b = allocate<S1>(100, 101, 102);
+    // b->a = 100;
+    // b->b = 101;
+    // b->c = 102;
     std::cout << sizeof(*b) << std::endl;
     std::cout << *b << std::endl;
 
