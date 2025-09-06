@@ -25,6 +25,10 @@ void deallocate(T* ptr)
 {
     using namespace MemoryPool;
     assert(ptr != nullptr && "ptr is nullptr");
+    // 如果T是非平凡可析构的，则调用析构函数
+    if constexpr (!std::is_trivially_destructible_v<T>) {
+        ptr->~T();
+    }
     ThreadCache::deallocate(ptr, sizeof(*ptr));
 }
 
