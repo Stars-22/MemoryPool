@@ -41,6 +41,15 @@ namespace MemoryPool
         [[nodiscard]] void* getFirstPtr() const;
 
         [[nodiscard]] size_t getPoolSize() const;
+
+        size_t getSlotAmount() const {
+            return slotAmount;
+        }
+        size_t getUsedAmount() const {
+            return usedAmount;
+        }
+
+
     };
 } // MemoryPool
 
