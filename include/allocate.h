@@ -32,4 +32,34 @@ void deallocate(T* ptr)
     ThreadCache::deallocate(ptr, sizeof(*ptr));
 }
 
+template <typename T>
+T* allocateArray(const size_t size)
+{
+    using namespace MemoryPool;
+    size_t totalSize = sizeof(T) * size;
+
+    if (std::is_same_v<T, char> ||
+        std::is_same_v<T, signed char> ||
+        std::is_same_v<T, unsigned char>)
+    {
+        totalSize += sizeof(T);
+    }
+
+    T* ptr = static_cast<T*>(ThreadCache::allocate(totalSize));
+
+    if constexpr (!std::is_trivially_default_constructible_v<T>) {
+        for (size_t i = 0; i < size; ++i) {
+            new (&ptr[i]) T(); // 默认构造
+        }
+    }
+
+    if (std::is_same_v<T, char> ||
+        std::is_same_v<T, signed char> ||
+        std::is_same_v<T, unsigned char>)
+    {
+        ptr[size] = T(0);
+    }
+    return ptr;
+}
+
 #endif //MEMORYPOOL_ALLOCATE_H
