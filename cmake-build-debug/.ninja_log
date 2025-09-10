@@ -1,5 +1,0 @@
-# ninja log v6
-5	1579	7791705782472179	CMakeFiles/MemoryPool.dir/src/MemoryPool.cpp.obj	c786185ceffdf926
-290	2165	7791705785330366	CMakeFiles/MemoryPool.dir/src/ThreadCache.cpp.obj	f74fca0079f9342f
-2521	3785	7791705807641222	bin/MemoryPool.exe	2de9f8b431f0263d
-672	2520	7791705789148448	CMakeFiles/MemoryPool.dir/src/main.cpp.obj	4514155065a955a8
