@@ -1,15 +1,16 @@
-//
-// Created by stars on 2025/9/4.
-//
+/**
+ * @file MemoryPool.cpp
+ * @brief 内存池类实现
+ */
 
+#include "../include/MemoryPool.h"
 #include <cassert>
 #include <cstring>
-#include "../include/MemoryPool.h"
 
 namespace MemoryPool
 {
-    MemoryPool::MemoryPool(char* firstPtr, size_t poolSize, size_t slotSize)
-        : firstPtr(firstPtr), poolSize(poolSize), slotSize(slotSize)
+    MemoryPool::MemoryPool(char* firstPtr, const size_t poolSize, const size_t slotSize) :
+        firstPtr(firstPtr), poolSize(poolSize), slotSize(slotSize)
     {
         // 计算块的数量
         slotAmount = poolSize / slotSize;
@@ -26,14 +27,12 @@ namespace MemoryPool
         usedAmount = 0;
     }
 
-    /**
-     * 从内存池中分配一块内存空间
-     * @return 指向分配的内存空间的指针，如果内存池已满则返回nullptr
-     */
     void* MemoryPool::allocate()
     {
-        if (usedAmount >= slotAmount) return nullptr;
-        // 从释放链表中获取内存
+        if (usedAmount >= slotAmount)
+            return nullptr;
+
+        // 优先从空闲链表分配
         if (freeSlot != nullptr)
         {
             void* ptr = freeSlot;
@@ -42,7 +41,8 @@ namespace MemoryPool
             usedAmount++;
             return ptr;
         }
-        // 从未被使用的地址获取内存
+
+        // 从未使用区域分配
         if (curPtr <= lastPtr)
         {
             void* ptr = curPtr;
@@ -54,12 +54,6 @@ namespace MemoryPool
         return nullptr;
     }
 
-    /**
-     * @brief 释放内存池中分配的内存块
-     * @param ptr 指向要释放的内存块的指针
-     * @note 该函数将内存块返回到内存池的空闲列表中，而不是操作系统
-     * @return 是否可以释放此Pool
-     */
     bool MemoryPool::deallocate(void* ptr)
     {
         // 检查指针是否在分配的内存范围内
@@ -68,6 +62,7 @@ namespace MemoryPool
         assert((static_cast<char*>(ptr) - firstPtr) % slotSize == 0 && "Pointer not aligned to slot size");
         // 检查是否有已使用的槽位
         assert(usedAmount > 0 && "No slots used");
+
         usedAmount--;
         static_cast<Slot*>(ptr)->next = freeSlot;
         freeSlot = static_cast<Slot*>(ptr);
@@ -77,4 +72,4 @@ namespace MemoryPool
     void* MemoryPool::getFirstPtr() const { return firstPtr; }
 
     size_t MemoryPool::getPoolSize() const { return poolSize; }
-} // MemoryPool
+} // namespace MemoryPool
