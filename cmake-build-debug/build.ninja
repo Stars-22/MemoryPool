@@ -49,6 +49,13 @@ cmake_ninja_workdir = C$:/Users/LinJun/Desktop/MemoryPool/cmake-build-debug/
 
 build cmake_object_order_depends_target_MemoryPool: phony || .
 
+build CMakeFiles/MemoryPool.dir/src/CentralCache.cpp.obj: CXX_COMPILER__MemoryPool_unscanned_Debug C$:/Users/LinJun/Desktop/MemoryPool/src/CentralCache.cpp || cmake_object_order_depends_target_MemoryPool
+  DEP_FILE = CMakeFiles\MemoryPool.dir\src\CentralCache.cpp.obj.d
+  FLAGS = -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -pedantic
+  INCLUDES = -IC:/Users/LinJun/Desktop/MemoryPool/include
+  OBJECT_DIR = CMakeFiles\MemoryPool.dir
+  OBJECT_FILE_DIR = CMakeFiles\MemoryPool.dir\src
+
 build CMakeFiles/MemoryPool.dir/src/MemoryPool.cpp.obj: CXX_COMPILER__MemoryPool_unscanned_Debug C$:/Users/LinJun/Desktop/MemoryPool/src/MemoryPool.cpp || cmake_object_order_depends_target_MemoryPool
   DEP_FILE = CMakeFiles\MemoryPool.dir\src\MemoryPool.cpp.obj.d
   FLAGS = -g -std=c++17 -fdiagnostics-color=always -Wall -Wextra -pedantic
@@ -78,7 +85,7 @@ build CMakeFiles/MemoryPool.dir/src/main.cpp.obj: CXX_COMPILER__MemoryPool_unsca
 #############################################
 # Link the executable bin\MemoryPool.exe
 
-build bin/MemoryPool.exe: CXX_EXECUTABLE_LINKER__MemoryPool_Debug CMakeFiles/MemoryPool.dir/src/MemoryPool.cpp.obj CMakeFiles/MemoryPool.dir/src/ThreadCache.cpp.obj CMakeFiles/MemoryPool.dir/src/main.cpp.obj
+build bin/MemoryPool.exe: CXX_EXECUTABLE_LINKER__MemoryPool_Debug CMakeFiles/MemoryPool.dir/src/CentralCache.cpp.obj CMakeFiles/MemoryPool.dir/src/MemoryPool.cpp.obj CMakeFiles/MemoryPool.dir/src/ThreadCache.cpp.obj CMakeFiles/MemoryPool.dir/src/main.cpp.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\MemoryPool.dir

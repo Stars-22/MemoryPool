@@ -22,7 +22,9 @@ file(GLOB SOURCES
 # 创建可执行文件
 add_executable(MemoryPool ${SOURCES}
         include/allocate.h
-        CentralCache.h)
+        src/CentralCache.cpp
+        src/CentralCache.cpp
+)
 
 # 设置目标属性
 target_include_directories(MemoryPool PRIVATE include)
