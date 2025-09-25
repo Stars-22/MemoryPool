@@ -4,7 +4,7 @@
 
 #ifndef MEMORYPOOL_MEMORYPOOL_H
 #define MEMORYPOOL_MEMORYPOOL_H
-
+#include <cstddef>
 namespace MemoryPool
 {
     struct Slot // 块
@@ -47,6 +47,10 @@ namespace MemoryPool
         }
         size_t getUsedAmount() const {
             return usedAmount;
+        }
+
+        size_t getSlotSize() const {
+            return slotSize;
         }
 
 
