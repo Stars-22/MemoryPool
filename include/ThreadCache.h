@@ -7,8 +7,8 @@
 #define MEMORYPOOL_THREADCACHE_H
 #include <array>
 #include <map>
-#include "Config.h"
 #include "MemoryPool.h"
+#include "config.h"
 
 namespace MemoryPool
 {

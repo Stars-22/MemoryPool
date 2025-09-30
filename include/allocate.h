@@ -29,7 +29,6 @@ T* allocate(Args&&... args)
 
 /**
  * @brief 析构并释放单个对象回内存池
- * @tparam T 要释放的对象类型
  * @param ptr 指向要释放对象的指针
  */
 template <typename T>
