@@ -6,6 +6,7 @@
 #ifndef MEMORYPOOL_MEMORYPOOL_H
 #define MEMORYPOOL_MEMORYPOOL_H
 #include <cstddef>
+#include <cstddef>
 
 namespace MemoryPool
 {
@@ -61,7 +62,20 @@ namespace MemoryPool
         [[nodiscard]] void* getFirstPtr() const;
 
         [[nodiscard]] size_t getPoolSize() const;
-    };
-} // namespace MemoryPool
 
-#endif // MEMORYPOOL_MEMORYPOOL_H
+        size_t getSlotAmount() const {
+            return slotAmount;
+        }
+        size_t getUsedAmount() const {
+            return usedAmount;
+        }
+
+        size_t getSlotSize() const {
+            return slotSize;
+        }
+
+
+    };
+} // MemoryPool
+
+#endif //MEMORYPOOL_MEMORYPOOL_H
