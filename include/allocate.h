@@ -6,7 +6,7 @@
 #ifndef MEMORYPOOL_ALLOCATE_H
 #define MEMORYPOOL_ALLOCATE_H
 #include "ThreadCache.h"
-// @TODO 智能指针接口
+//@TODO: 智能指针接口
 
 /**
  * @brief 从内存池分配并构造单个对象
