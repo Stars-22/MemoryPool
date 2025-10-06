@@ -6,7 +6,6 @@
 #ifndef MEMORYPOOL_MEMORYPOOL_H
 #define MEMORYPOOL_MEMORYPOOL_H
 #include <cstddef>
-#include <cstddef>
 
 namespace MemoryPool
 {
