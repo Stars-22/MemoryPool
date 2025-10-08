@@ -53,8 +53,8 @@ namespace MemoryPool
             }
         };
         std::array<Spans, MAX_PAGE_NUM> spans;
-        std::unordered_map<void*, Span*> span_head;
-        std::unordered_map<void*, Span*> span_tail;
+        std::unordered_map<void*, Span*> spans_head;
+        std::unordered_map<void*, Span*> spans_tail;
         friend struct Span;
 
     public:
