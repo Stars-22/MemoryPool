@@ -57,6 +57,9 @@ namespace MemoryPool
         std::unordered_map<void*, Span*> spans_tail;
         friend struct Span;
 
+        void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
+        void deallocateToSystem(void* ptr);
+
     public:
         PageCache(const PageCache&) = delete;
         PageCache& operator=(const PageCache&) = delete;
@@ -64,8 +67,6 @@ namespace MemoryPool
         static PageCache* getCache();
         void* allocate(size_t size);
         void deallocate(void* ptr, size_t objSize);
-        void* allocateFromSystem();
-        void deallocateToSystem(void* ptr);
     };
 
 } // namespace MemoryPool

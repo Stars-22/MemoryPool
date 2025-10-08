@@ -4,8 +4,10 @@
  */
 
 #include "../include/ThreadCache.h"
+#include "../include/PageCache.h"
 #include <cassert>
 #include <cstdlib>
+
 
 namespace MemoryPool
 {
@@ -140,14 +142,11 @@ namespace MemoryPool
 
     void* ThreadCache::allocateFromPageCache(const size_t objSize)
     {
-        // return PageCache::getCache()->allocate(objSize);
-        //@TODO: 实现PageCache
-        return nullptr;
+        return PageCache::getCache()->allocate(objSize);
     }
 
     void ThreadCache::deallocateToPageCache(void* ptr, const size_t objSize)
     {
-        // PageCache::getCache()->deallocate(ptr, objSize);
-        //@TODO: 实现PageCache
+        PageCache::getCache()->deallocate(ptr, objSize);
     }
 } // namespace MemoryPool

@@ -2,11 +2,10 @@
 // Created by stars on 2025/10/6.
 //
 
-#include "PageCache.h"
+#include "../include/PageCache.h"
 
-#include <assert.h>
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 
 namespace MemoryPool
 {
@@ -47,8 +46,11 @@ namespace MemoryPool
 
     void* PageCache::allocate(size_t size)
     {
-        assert(size % EACH_PAGE_SIZE == 0);
-        size_t pageNum = size / EACH_PAGE_SIZE - 1;
+        size_t pageNum = (size - 1) / EACH_PAGE_SIZE;
+        if (pageNum > MAX_PAGE_NUM)
+        {
+            return allocateFromSystem(pageNum);
+        }
         if (spans[pageNum].first != nullptr)
         {
             void* ptr = spans[pageNum].get();
@@ -72,13 +74,18 @@ namespace MemoryPool
         spans[MAX_PAGE_NUM - pageNum].add(spanNeedless);
         spans_head.insert(std::make_pair(spanNeedless, spanNeedless));
         void* spanNeedless_tail = static_cast<char*>(static_cast<void*>(spanNeedless)) + spanNeedlessSize;
-        spans_tail.insert(std::make_pair(spanNeedless_tail , spanNeedless));
+        spans_tail.insert(std::make_pair(spanNeedless_tail, spanNeedless));
         return span;
     }
 
     void PageCache::deallocate(void* ptr, size_t objSize)
     {
-        assert(objSize % EACH_PAGE_SIZE == 0);
+        objSize = (objSize + EACH_PAGE_SIZE - 1) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+        if (objSize > EACH_PAGE_SIZE * MAX_PAGE_NUM)
+        {
+            deallocateToSystem(ptr);
+            return;
+        }
         auto* span_ptr = static_cast<char*>(ptr);
         if (spans_head.count(span_ptr + objSize) > 0)
         {
@@ -107,17 +114,14 @@ namespace MemoryPool
         spans[objSize / EACH_PAGE_SIZE - 1].add(span);
         spans_head.insert(std::make_pair(span, span));
         void* span_tail = static_cast<char*>(static_cast<void*>(span)) + objSize;
-        spans_tail.insert(std::make_pair(span_tail , span));
+        spans_tail.insert(std::make_pair(span_tail, span));
     }
 
-    void* PageCache::allocateFromSystem()
+    void* PageCache::allocateFromSystem(size_t pageNum)
     {
         //@OPTIMIZE:页对齐分配内存
-        return std::malloc(EACH_PAGE_SIZE * MAX_PAGE_NUM);
+        return std::malloc(EACH_PAGE_SIZE * pageNum);
     }
 
-    void PageCache::deallocateToSystem(void* ptr)
-    {
-        free(ptr);
-    }
+    void PageCache::deallocateToSystem(void* ptr) { free(ptr); }
 } // namespace MemoryPool
