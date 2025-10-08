@@ -9,6 +9,8 @@
 
 namespace MemoryPool
 {
+    PageCache* PageCache::cache = nullptr;
+
     Span::~Span()
     {
         if (prev)

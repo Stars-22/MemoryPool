@@ -109,8 +109,9 @@ namespace MemoryPool
 
     MemoryPool* ThreadCache::allocatePool(const size_t objSize)
     {
+        //@TODO: 对CentralCache的支持
         char* slot = static_cast<char*>(std::malloc(objSize * EACH_POOL_SLOT_NUM));
-        // char* slot = CenterCache::getCache()->allocate(slotSize * EACH_POOL_SLOT_NUM);
+        // char* slot = CentralCache::getCache()->allocate(slotSize * EACH_POOL_SLOT_NUM);
         if (slot == nullptr)
             return nullptr;
 
@@ -136,7 +137,9 @@ namespace MemoryPool
 
     void ThreadCache::deallocatePool(void* ptr, const size_t objSize)
     {
-        // CenterCache::getCache()->deallocate(ptr, objSize);
+        //@TODO: 对CentralCache的支持
+        // CentralCache::getCache()->deallocate(ptr, objSize);
+        auto a = objSize;
         std::free(ptr);
     }
 

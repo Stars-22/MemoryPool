@@ -23,7 +23,7 @@ namespace MemoryPool
     class PageCache
     {
     private:
-        static thread_local PageCache* cache;
+        static PageCache* cache;
         PageCache(){}
 
         struct Spans
