@@ -10,19 +10,19 @@
 namespace MemoryPool
 {
     /**
-     * @brief 内存块结构体，用于构建空闲块链表
-     */
-    struct Slot
-    {
-        Slot* next; // 指向下一个空闲块
-    };
-
-    /**
      * @brief 内存池类，用于高效管理小块内存的分配和释放
      */
     class MemoryPool
     {
     private:
+        /**
+         * @brief 内存块结构体，用于构建空闲块链表
+         */
+        struct Slot
+        {
+            Slot* next; // 指向下一个空闲块
+        };
+
         char* firstPtr;    // 内存池起始地址
         char* lastPtr;     // 最后一个可用块的地址
         Slot* freeSlot;    // 空闲块链表头
@@ -62,19 +62,11 @@ namespace MemoryPool
 
         [[nodiscard]] size_t getPoolSize() const;
 
-        size_t getSlotAmount() const {
-            return slotAmount;
-        }
-        size_t getUsedAmount() const {
-            return usedAmount;
-        }
+        size_t getSlotAmount() const { return slotAmount; }
+        size_t getUsedAmount() const { return usedAmount; }
 
-        size_t getSlotSize() const {
-            return slotSize;
-        }
-
-
+        size_t getSlotSize() const { return slotSize; }
     };
-} // MemoryPool
+} // namespace MemoryPool
 
-#endif //MEMORYPOOL_MEMORYPOOL_H
+#endif // MEMORYPOOL_MEMORYPOOL_H

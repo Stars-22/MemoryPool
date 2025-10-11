@@ -11,17 +11,17 @@
 
 namespace MemoryPool
 {
-    // 桶结构体，用于管理特定大小的内存池
-    struct Bucket
-    {
-        MemoryPool* mp; // 指向内存池对象的指针
-        std::mutex mutex;           // 互斥锁，保证线程安全访问
-    };
-
     // 中央缓存类，管理不同大小的内存池
     class CentralCache
     {
     private:
+        // 桶结构体，用于管理特定大小的内存池
+        struct Bucket
+        {
+            MemoryPool* mp; // 指向内存池对象的指针
+            std::mutex mutex;           // 互斥锁，保证线程安全访问
+        };
+
         static CentralCache* cache;
         // 构造函数：初始化所有桶的内存池指针为空
         CentralCache() : buckets()

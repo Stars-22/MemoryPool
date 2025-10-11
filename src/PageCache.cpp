@@ -11,18 +11,6 @@ namespace MemoryPool
 {
     PageCache* PageCache::cache = new PageCache();
 
-    Span::~Span()
-    {
-        if (prev)
-            prev->next = next;
-        if (next)
-            next->prev = prev;
-        if (!prev && !next)
-        {
-            PageCache::getCache()->spans[size / EACH_PAGE_SIZE - 1].first = nullptr;
-        }
-    }
-
     PageCache::~PageCache()
     {
         for (size_t i = 0; i < MAX_PAGE_NUM; i++)

@@ -11,18 +11,29 @@
 
 namespace MemoryPool
 {
-    struct Span
-    {
-        size_t size;
-        Span* prev = nullptr;
-        Span* next = nullptr;
-        Span(size_t size) : size(size) {}
-        ~Span();
-    };
 
     class PageCache
     {
     private:
+        struct Span
+        {
+            size_t size;
+            Span* prev = nullptr;
+            Span* next = nullptr;
+            Span(size_t size) : size(size) {}
+            ~Span()
+            {
+                if (prev)
+                    prev->next = next;
+                if (next)
+                    next->prev = prev;
+                if (!prev && !next)
+                {
+                    getCache()->spans[size / EACH_PAGE_SIZE - 1].first = nullptr;
+                }
+            }
+        };
+
         static PageCache* cache;
         PageCache(){}
 
