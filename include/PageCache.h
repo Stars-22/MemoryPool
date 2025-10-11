@@ -20,7 +20,7 @@ namespace MemoryPool
             size_t size;
             Span* prev = nullptr;
             Span* next = nullptr;
-            Span(size_t size) : size(size) {}
+            explicit Span(const size_t size) : size(size) {}
             ~Span()
             {
                 if (prev)
@@ -68,8 +68,8 @@ namespace MemoryPool
         std::unordered_map<void*, Span*> spans_tail;
         friend struct Span;
 
-        void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
-        void deallocateToSystem(void* ptr);
+        static void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
+        static void deallocateToSystem(void* ptr);
 
     public:
         PageCache(const PageCache&) = delete;

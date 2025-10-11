@@ -6,8 +6,10 @@
 #ifndef MEMORYPOOL_THREADCACHE_H
 #define MEMORYPOOL_THREADCACHE_H
 #include <array>
-#include <map>
-#include "MemoryPool.h"
+
+#include "PageCache.h"
+#include "CacheBase.h"
+#include "MemoryPools.h"
 #include "config.h"
 
 namespace MemoryPool
@@ -15,89 +17,87 @@ namespace MemoryPool
     /**
      * @brief 线程缓存类，用于管理线程本地的内存池
      */
-    class ThreadCache
+    class ThreadCache final : public CacheBase<MemoryPools, ThreadCache, ThreadLocalStorage>
     {
     private:
-        /**
-         * @brief 内存池容器，管理同一大小的多个内存池
-         */
-        struct MemoryPools
+        friend struct ThreadLocalStorage;
+        ThreadCache() = default;
+
+        MemoryPool* allocatePool(const size_t objSize) override
         {
-            std::map<char*, MemoryPool*> poolsMap; // 内存地址到内存池的映射
-            MemoryPool* firstPool;                 // 内存池链表头
+            //@TODO: 对CentralCache的支持
+            auto* slot = static_cast<char*>(std::malloc(objSize * EACH_POOL_SLOT_NUM));
+            // char* slot = CentralCache::getCache()->allocate(slotSize * EACH_POOL_SLOT_NUM);
+            if (slot == nullptr)
+                return nullptr;
 
-            MemoryPools() : firstPool(nullptr) {}
+            const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM, objSize);
+            pools[objSize / ALIGN - 1]->addPool(pool);
+            return pool;
+        }
 
-            ~MemoryPools()
-            {
-                for (auto& pair : poolsMap)
-                {
-                    //@TODO: 此处是测试ThreadCache代码
-                    getCache()->deallocatePool(pair.second->getFirstPtr(), pair.second->getPoolSize());
-                    delete pair.second;
-                }
-                poolsMap.clear();
-                firstPool = nullptr;
-            }
-        };
-
-        static thread_local ThreadCache* cache;                // 线程本地缓存实例
-        std::array<MemoryPools*, MAX_SLOT_SIZE / ALIGN> pools; // 按块大小分组的内存池数组
-        ThreadCache();
-
-        /**
-         * @brief 分配一个新的内存池
-         * @param objSize 所需内存块的大小
-         * @return 返回新分配的内存池指针
-         */
-        MemoryPool* allocatePool(size_t objSize);
-
-        /**
-         * @brief 释放内存池
-         * @param ptr 要释放的内存地址
-         * @param objSize 要释放的内存大小
-         */
-        void deallocatePool(void* ptr, size_t objSize);
-
-        /**
-         * @brief 从页面缓存（Page Cache）中分配指定大小的内存块
-         * @param objSize 所需内存块的大小
-         * @return void* 返回新分配内存的指针
-         */
-        void* allocateFromPageCache(size_t objSize);
-
-        /**
-         * @brief 将内存块释放回页面缓存（Page Cache）
-         * @param ptr 要释放的内存地址
-         * @param objSize 释放的内存大小
-         * @return void
-         */
-        void deallocateToPageCache(void* ptr, size_t objSize);
+        void deallocatePool(MemoryPool* pool) override
+        {
+            //@TODO: 对CentralCache的支持
+            std::free(pool->getFirstPtr());
+            // CentralCache::getCache()->deallocate(pool->getFirstPtr(), pool->getPoolSize());
+            delete pool;
+        }
 
     public:
         ThreadCache(const ThreadCache&) = delete;
         ThreadCache& operator=(const ThreadCache&) = delete;
-        ~ThreadCache();
+        ~ThreadCache() override
+        {
+            for (const auto& poolGroup : pools)
+            {
+                for (auto& pair : poolGroup->poolsMap)
+                {
+                    //@TODO: 此处是测试ThreadCache代码
+                    deallocatePool(pair.second);
+                }
+                delete poolGroup;
+            }
+        }
 
-        /**
-         * @brief 获取当前线程的缓存实例
-         * @return 线程本地ThreadCache指针
-         */
-        static ThreadCache* getCache();
+        void* allocate(const size_t objSize) override
+        {
+            // 如果大于最大内存池大小，则直接从PageCache中分配
+            if (objSize > MAX_SLOT_SIZE)
+            {
+                return PageCache::getCache()->allocate(objSize);
+            }
 
-        /**
-         * @brief 分配指定大小的内存
-         * @param objSize 要分配的字节数
-         * @return 分配的内存指针，失败返回nullptr
-         */
-        void* allocate(size_t objSize);
+            const size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
+            const size_t slotSize = (slotNum + 1) * ALIGN;
+            void* obj = pools[slotNum]->allocate();
+            if (obj != nullptr)
+                return obj;
+            // 分配新内存池
+            MemoryPool* pool = allocatePool(slotSize);
+            assert(pool != nullptr && "Failed to allocate pool");
+            if ((obj = pool->allocate()) != nullptr)
+                return obj;
+            return nullptr;
+        }
 
-        /**
-         * @brief 释放内存
-         * @param ptr 要释放的内存指针
-         * @param objSize 内存大小
-         */
-        void deallocate(void* ptr, size_t objSize);
+        void deallocate(void* ptr, const size_t objSize) override
+        {
+            // 如果大于最大内存池大小，则直接释放到PageCache中
+            if (objSize > MAX_SLOT_SIZE)
+            {
+                PageCache::getCache()->deallocate(ptr, objSize);
+            }
+            assert(ptr != nullptr && "ptr is nullptr");
+
+            const size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
+            MemoryPool* pool = pools[slotNum]->deallocate(ptr);
+            if (pools[slotNum]->deallocate(ptr))
+            {
+                // 内存池已空，释放资源
+                deallocatePool(pool);
+            }
+        }
     };
 } // namespace MemoryPool
 

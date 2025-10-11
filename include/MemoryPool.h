@@ -62,10 +62,10 @@ namespace MemoryPool
 
         [[nodiscard]] size_t getPoolSize() const;
 
-        size_t getSlotAmount() const { return slotAmount; }
-        size_t getUsedAmount() const { return usedAmount; }
+        [[nodiscard]] size_t getSlotAmount() const { return slotAmount; }
+        [[nodiscard]] size_t getUsedAmount() const { return usedAmount; }
 
-        size_t getSlotSize() const { return slotSize; }
+        [[nodiscard]] size_t getSlotSize() const { return slotSize; }
     };
 } // namespace MemoryPool
 
