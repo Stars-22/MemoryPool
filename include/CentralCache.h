@@ -9,41 +9,49 @@
 #include <array>
 #include <mutex>
 
-// 桶结构体，用于管理特定大小的内存池
-struct Bucket
+namespace MemoryPool
 {
-    MemoryPool::MemoryPool* mp; // 指向内存池对象的指针
-    std::mutex mutex;           // 互斥锁，保证线程安全访问
-};
-
-// 中央缓存类，管理不同大小的内存池
-class CentralCache
-{
-public:
-    // 构造函数：初始化所有桶的内存池指针为空
-    CentralCache() : buckets()
+    // 桶结构体，用于管理特定大小的内存池
+    struct Bucket
     {
-        // 遍历并初始化所有桶
-        for (auto& item : buckets)
+        MemoryPool* mp; // 指向内存池对象的指针
+        std::mutex mutex;           // 互斥锁，保证线程安全访问
+    };
+
+    // 中央缓存类，管理不同大小的内存池
+    class CentralCache
+    {
+    private:
+        static CentralCache* cache;
+        // 构造函数：初始化所有桶的内存池指针为空
+        CentralCache() : buckets()
         {
-            item.mp = nullptr; // 初始状态无内存池
+            // 遍历并初始化所有桶
+            for (auto& item : buckets)
+            {
+                item.mp = nullptr; // 初始状态无内存池
+            }
         }
-    }
 
-    // 向页缓存请求新页面
-    void requestPageToPageCache(size_t size);
 
-    // 释放页面回页缓存
-    void releasePageToPageCache();
+    public:
+        static CentralCache* getCache();
 
-    // 分配指定大小的内存池
-    MemoryPool::MemoryPool* allocate(size_t slot_size);
+        // 向页缓存请求新页面
+        void requestPageFromPageCache(size_t size);
 
-    // 从线程缓存接收内存池
-    void receiveMemoryPoolFromThreadCache(MemoryPool::MemoryPool* mp);
+        // 释放页面回页缓存
+        void releasePageToPageCache();
 
-    // 公开的桶数组（实际应用中通常设为private）
-    std::array<Bucket, 9> buckets; // 9个桶，管理不同大小的内存池
-};
+        // 分配指定大小的内存池
+        MemoryPool* allocate(size_t slot_size);
+
+        // 从线程缓存接收内存池
+        void receiveMemoryPoolFromThreadCache(MemoryPool* mp);
+
+        // 公开的桶数组（实际应用中通常设为private）
+        std::array<Bucket, 9> buckets; // 9个桶，管理不同大小的内存池
+    };
+}
 
 #endif // CENTRALCACHE_H
