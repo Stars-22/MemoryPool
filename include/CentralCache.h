@@ -5,53 +5,43 @@
 #ifndef CENTRALCACHE_H
 #define CENTRALCACHE_H
 
-#include <MemoryPool.h>
+#include <CacheBase.h>
+#include <MemoryPools.h>
 #include <array>
-#include <mutex>
 
 namespace MemoryPool
 {
     // 中央缓存类，管理不同大小的内存池
-    class CentralCache
+    class CentralCache final : public CacheBase<MemoryPools_Lock, CentralCache>
     {
     private:
-        // 桶结构体，用于管理特定大小的内存池
-        struct Bucket
+        friend struct GlobalStorage;
+        CentralCache() = default;
+        MemoryPool* allocatePool(const size_t objSize) override
         {
-            MemoryPool* mp; // 指向内存池对象的指针
-            std::mutex mutex;           // 互斥锁，保证线程安全访问
-        };
-
-        static CentralCache* cache;
-        // 构造函数：初始化所有桶的内存池指针为空
-        CentralCache() : buckets()
-        {
-            // 遍历并初始化所有桶
-            for (auto& item : buckets)
-            {
-                item.mp = nullptr; // 初始状态无内存池
-            }
+            auto* slot = static_cast<char*>(PageCache::getCache()->allocate(objSize * EACH_POOL_SLOT_NUM));
+            if (slot == nullptr)
+                return nullptr;
+            const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM, objSize);
+            pools[objSize / (ALIGN * mul) - 1]->addPool(pool);
+            return pool;
         }
 
+        void deallocatePool(MemoryPool* pool) override
+        {
+            PageCache::getCache()->deallocate(pool->getFirstPtr(), pool->getPoolSize());
+            delete pool;
+        }
 
     public:
-        static CentralCache* getCache();
+        constexpr static size_t mul = EACH_POOL_SLOT_NUM;
+        CentralCache(const CentralCache&) = delete;
+        CentralCache& operator=(const CentralCache&) = delete;
+        ~CentralCache() override { cleanup(); }
 
-        // 向页缓存请求新页面
-        void requestPageFromPageCache(size_t size);
-
-        // 释放页面回页缓存
-        void releasePageToPageCache();
-
-        // 分配指定大小的内存池
-        MemoryPool* allocate(size_t slot_size);
-
-        // 从线程缓存接收内存池
-        void receiveMemoryPoolFromThreadCache(MemoryPool* mp);
-
-        // 公开的桶数组（实际应用中通常设为private）
-        std::array<Bucket, 9> buckets; // 9个桶，管理不同大小的内存池
+        void* allocate(const size_t objSize) override { return CacheBase::allocate(objSize); }
+        void deallocate(void* ptr, const size_t objSize) override { CacheBase::deallocate(ptr, objSize); }
     };
-}
+} // namespace MemoryPool
 
 #endif // CENTRALCACHE_H

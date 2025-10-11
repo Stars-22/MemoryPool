@@ -54,7 +54,7 @@ namespace MemoryPool
         }
         size_t spanNeedlessSize = (pageNum + 1) * EACH_PAGE_SIZE;
         auto* spanNeedless = new (static_cast<char*>(span) + spanNeedlessSize) Span(spanNeedlessSize);
-        spans[MAX_PAGE_NUM - pageNum].add(spanNeedless);
+        spans[MAX_PAGE_NUM - pageNum - 1].add(spanNeedless);
         spans_head.insert(std::make_pair(spanNeedless, spanNeedless));
         void* spanNeedless_tail = static_cast<char*>(static_cast<void*>(spanNeedless)) + spanNeedlessSize;
         spans_tail.insert(std::make_pair(spanNeedless_tail, spanNeedless));
