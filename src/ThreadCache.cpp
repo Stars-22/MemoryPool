@@ -48,7 +48,7 @@ namespace MemoryPool
 
         size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
         size_t slotSize = (slotNum + 1) * ALIGN;
-        MemoryPool* pool = getCache()->pools[slotNum]->firstPool;
+        MemoryPool* pool = pools[slotNum]->firstPool;
         // 用于存储分配对象的指针
         void* obj = nullptr;
 
@@ -83,7 +83,7 @@ namespace MemoryPool
         assert(ptr != nullptr && "ptr is nullptr");
 
         size_t slotNum = (objSize + ALIGN - 1) / ALIGN - 1;
-        MemoryPools* pools = getCache()->pools[slotNum];
+        MemoryPools* pools = this->pools[slotNum];
         // 查找所在的内存池
         auto it = pools->poolsMap.lower_bound(static_cast<char*>(ptr));
         assert(it != pools->poolsMap.end() && "pool is nullptr");
@@ -118,9 +118,9 @@ namespace MemoryPool
         const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM, objSize);
         const size_t slotNum = objSize / ALIGN - 1;
 
-        if (auto temp = getCache()->pools[slotNum]->firstPool; temp == nullptr)
+        if (auto temp = pools[slotNum]->firstPool; temp == nullptr)
         {
-            getCache()->pools[slotNum]->firstPool = pool;
+            pools[slotNum]->firstPool = pool;
         }
         else
         {
@@ -131,7 +131,7 @@ namespace MemoryPool
             temp->nextPool = pool;
             pool->prevPool = temp;
         }
-        getCache()->pools[slotNum]->poolsMap[slot] = pool;
+        pools[slotNum]->poolsMap[slot] = pool;
         return pool;
     }
 

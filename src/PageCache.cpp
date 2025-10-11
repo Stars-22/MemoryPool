@@ -9,7 +9,7 @@
 
 namespace MemoryPool
 {
-    PageCache* PageCache::cache = nullptr;
+    PageCache* PageCache::cache = new PageCache();
 
     Span::~Span()
     {
@@ -37,14 +37,7 @@ namespace MemoryPool
         }
     }
 
-    PageCache* PageCache::getCache()
-    {
-        if (cache == nullptr)
-        {
-            cache = new PageCache();
-        }
-        return cache;
-    }
+    PageCache* PageCache::getCache() { return cache; }
 
     void* PageCache::allocate(size_t size)
     {

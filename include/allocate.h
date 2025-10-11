@@ -19,7 +19,7 @@ template <typename T, typename... Args>
 T* allocate(Args&&... args)
 {
     using namespace MemoryPool;
-    T* ptr = static_cast<T*>(ThreadCache::allocate(sizeof(T)));
+    T* ptr = static_cast<T*>(ThreadCache::getCache()->allocate(sizeof(T)));
     if (ptr)
     {
         new (ptr) T(std::forward<Args>(args)...);
@@ -40,7 +40,7 @@ void deallocate(T* ptr)
     {
         ptr->~T();
     }
-    ThreadCache::deallocate(ptr, sizeof(*ptr));
+    ThreadCache::getCache()->deallocate(ptr, sizeof(*ptr));
 }
 
 /**
@@ -61,7 +61,7 @@ T* allocateArray(const size_t size)
         totalSize += sizeof(T);
     }
 
-    void* ptr_void = ThreadCache::allocate(totalSize);
+    void* ptr_void = ThreadCache::getCache()->allocate(totalSize);
     auto* ptr_size = static_cast<size_t*>(ptr_void);
     T* ptr = static_cast<T*>(static_cast<void*>(static_cast<char*>(ptr_void) + sizeof(size_t)));
 
@@ -92,7 +92,7 @@ inline void deallocateArray(void* ptr)
     void* ptr_void = static_cast<char*>(ptr) - sizeof(size_t);
     const size_t totalSize = *static_cast<size_t*>(ptr_void);
 
-    ThreadCache::deallocate(ptr_void, totalSize);
+    ThreadCache::getCache()->deallocate(ptr_void, totalSize);
 }
 
 #endif // MEMORYPOOL_ALLOCATE_H

@@ -33,7 +33,7 @@ namespace MemoryPool
                 for (auto& pair : poolsMap)
                 {
                     //@TODO: 此处是测试ThreadCache代码
-                    deallocatePool(pair.second->getFirstPtr(), pair.second->getPoolSize());
+                    getCache()->deallocatePool(pair.second->getFirstPtr(), pair.second->getPoolSize());
                     delete pair.second;
                 }
                 poolsMap.clear();
@@ -50,21 +50,21 @@ namespace MemoryPool
          * @param objSize 所需内存块的大小
          * @return 返回新分配的内存池指针
          */
-        static MemoryPool* allocatePool(size_t objSize);
+        MemoryPool* allocatePool(size_t objSize);
 
         /**
          * @brief 释放内存池
          * @param ptr 要释放的内存地址
          * @param objSize 要释放的内存大小
          */
-        static void deallocatePool(void* ptr, size_t objSize);
+        void deallocatePool(void* ptr, size_t objSize);
 
         /**
          * @brief 从页面缓存（Page Cache）中分配指定大小的内存块
          * @param objSize 所需内存块的大小
          * @return void* 返回新分配内存的指针
          */
-        static void* allocateFromPageCache(size_t objSize);
+        void* allocateFromPageCache(size_t objSize);
 
         /**
          * @brief 将内存块释放回页面缓存（Page Cache）
@@ -72,7 +72,7 @@ namespace MemoryPool
          * @param objSize 释放的内存大小
          * @return void
          */
-        static void deallocateToPageCache(void* ptr, size_t objSize);
+        void deallocateToPageCache(void* ptr, size_t objSize);
 
     public:
         ThreadCache(const ThreadCache&) = delete;
@@ -90,14 +90,14 @@ namespace MemoryPool
          * @param objSize 要分配的字节数
          * @return 分配的内存指针，失败返回nullptr
          */
-        static void* allocate(size_t objSize);
+        void* allocate(size_t objSize);
 
         /**
          * @brief 释放内存
          * @param ptr 要释放的内存指针
          * @param objSize 内存大小
          */
-        static void deallocate(void* ptr, size_t objSize);
+        void deallocate(void* ptr, size_t objSize);
     };
 } // namespace MemoryPool
 
