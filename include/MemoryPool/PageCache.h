@@ -7,7 +7,7 @@
 
 #include <array>
 #include <unordered_map>
-#include "config.h"
+#include "../config.h"
 
 namespace MemoryPool
 {
@@ -21,53 +21,23 @@ namespace MemoryPool
             Span* prev = nullptr;
             Span* next = nullptr;
             explicit Span(const size_t size) : size(size) {}
-            ~Span()
-            {
-                if (prev)
-                    prev->next = next;
-                if (next)
-                    next->prev = prev;
-                if (!prev && !next)
-                {
-                    getCache()->spans[size / EACH_PAGE_SIZE - 1].first = nullptr;
-                }
-            }
+            ~Span();
         };
-
-        static PageCache* cache;
-        PageCache(){}
-
         struct Spans
         {
             Span* first = nullptr;
             Span* last = nullptr;
-            Span* get()
-            {
-                Span* span = first;
-                if (first != nullptr)
-                {
-                    first->prev = nullptr;
-                    first = first->next;
-                }
-                return span;
-            }
-            void add(Span* span)
-            {
-                if (first == nullptr)
-                    first = span;
-                else
-                {
-                    span->prev = last;
-                    last->next = span;
-                }
-                last = span;
-            }
+            Span* get();
+            void add(Span* span);
         };
+        friend struct Span;
+
+        static PageCache* cache;
         std::array<Spans, MAX_PAGE_NUM> spans;
         std::unordered_map<void*, Span*> spans_head;
         std::unordered_map<void*, Span*> spans_tail;
-        friend struct Span;
 
+        PageCache() {}
         static void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
         static void deallocateToSystem(void* ptr);
 
@@ -75,6 +45,7 @@ namespace MemoryPool
         PageCache(const PageCache&) = delete;
         PageCache& operator=(const PageCache&) = delete;
         ~PageCache();
+
         static PageCache* getCache();
         void* allocate(size_t size);
         void deallocate(void* ptr, size_t objSize);

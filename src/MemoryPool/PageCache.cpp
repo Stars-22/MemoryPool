@@ -2,14 +2,48 @@
 // Created by stars on 2025/10/6.
 //
 
-#include "../include/PageCache.h"
-
+#include "../../include/MemoryPool/PageCache.h"
 #include <cstdlib>
 #include <cstring>
 
 namespace MemoryPool
 {
     PageCache* PageCache::cache = new PageCache();
+
+    PageCache::Span::~Span()
+    {
+        if (prev)
+            prev->next = next;
+        if (next)
+            next->prev = prev;
+        if (!prev && !next)
+        {
+            getCache()->spans[size / EACH_PAGE_SIZE - 1].first = nullptr;
+        }
+    }
+
+    PageCache::Span* PageCache::Spans::get()
+    {
+        Span* span = first;
+        if (first != nullptr)
+        {
+            first->prev = nullptr;
+            first = first->next;
+        }
+        return span;
+    }
+
+    void PageCache::Spans::add(Span* span)
+    {
+        if (first == nullptr)
+            first = span;
+        else
+        {
+            span->prev = last;
+            last->next = span;
+        }
+        last = span;
+    }
 
     PageCache::~PageCache()
     {

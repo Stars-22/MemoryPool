@@ -4,10 +4,11 @@
 
 #ifndef MEMORYPOOL_CACHEBASE_H
 #define MEMORYPOOL_CACHEBASE_H
+
 #include <array>
 #include <cassert>
+#include "../config.h"
 #include "MemoryPool.h"
-#include "config.h"
 
 namespace MemoryPool
 {
@@ -81,7 +82,7 @@ namespace MemoryPool
          * @brief 获取当前线程的缓存实例
          * @return 线程本地ThreadCache指针
          */
-        static Derived* getCache() { return StoragePolicy::template getCache<Derived>(); } // namespace MemoryPool
+        static Derived* getCache() { return StoragePolicy::template getCache<Derived>(); }
 
         /**
          * @brief 分配指定大小的内存
@@ -112,8 +113,7 @@ namespace MemoryPool
         {
             assert(ptr != nullptr && "ptr is nullptr");
             const size_t slotNum = (objSize + (ALIGN * mul) - 1) / (ALIGN * mul) - 1;
-            MemoryPool* pool = pools[slotNum]->deallocate(ptr);
-            if (pool)
+            if (MemoryPool* pool = pools[slotNum]->deallocate(ptr))
             {
                 // 内存池已空，释放资源
                 deallocatePool(pool);

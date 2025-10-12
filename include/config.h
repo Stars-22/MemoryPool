@@ -6,10 +6,12 @@
 #ifndef MEMORYPOOL_CONFIG_H
 #define MEMORYPOOL_CONFIG_H
 
+#include <cstddef>
+
 namespace MemoryPool
 {
     constexpr size_t ALIGN = 8;               // 内存对齐字节数
-    constexpr size_t MAX_SLOT_SIZE = 1024;     // 内存池管理的最大块大小
+    constexpr size_t MAX_SLOT_SIZE = 1024;    // 内存池管理的最大块大小
     constexpr size_t EACH_POOL_SLOT_NUM = 16; // 每个内存池包含的块数量
 
 

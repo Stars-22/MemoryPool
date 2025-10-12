@@ -57,14 +57,10 @@ namespace MemoryPool
          * @return 如果内存池已空返回true，否则返回false
          */
         bool deallocate(void* ptr);
-
         [[nodiscard]] void* getFirstPtr() const;
-
         [[nodiscard]] size_t getPoolSize() const;
-
         [[nodiscard]] size_t getSlotAmount() const { return slotAmount; }
         [[nodiscard]] size_t getUsedAmount() const { return usedAmount; }
-
         [[nodiscard]] size_t getSlotSize() const { return slotSize; }
     };
 } // namespace MemoryPool

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "../include/allocate.h"
+#include "../include/MemoryPool/allocate.h"
 using namespace std;
 
 /**
@@ -67,7 +67,6 @@ int main()
     for (int i = 0; i < 10; i++)
         cout << iarray1[i] << ' ';
     cout << endl;
-
 
 
     return 0;
