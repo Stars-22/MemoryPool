@@ -46,8 +46,8 @@ namespace MemoryPool
                 Span* span = first;
                 if (first != nullptr)
                 {
-                    first = first->next;
                     first->prev = nullptr;
+                    first = first->next;
                 }
                 return span;
             }

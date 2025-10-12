@@ -41,24 +41,35 @@ namespace MemoryPool
             return ptr;
         }
         void* span = nullptr;
+        size_t spanSize = 0;
         for (size_t i = pageNum; i < MAX_PAGE_NUM; i++)
         {
             if (spans[i].first == nullptr)
                 continue;
             span = spans[i].get();
+            spanSize = static_cast<Span*>(span)->size;
+            spans_tail.erase(static_cast<char*>(span) + spanSize);
             break;
         }
         if (span == nullptr)
         {
             span = allocateFromSystem();
+            spanSize = MAX_PAGE_NUM * EACH_PAGE_SIZE;
+            auto* span_Span = new (span) Span(spanSize);
+            spans_head.insert(std::make_pair(span, span_Span));
         }
-        size_t spanNeedlessSize = (pageNum + 1) * EACH_PAGE_SIZE;
-        auto* spanNeedless = new (static_cast<char*>(span) + spanNeedlessSize) Span(spanNeedlessSize);
-        spans[MAX_PAGE_NUM - pageNum - 1].add(spanNeedless);
-        spans_head.insert(std::make_pair(spanNeedless, spanNeedless));
-        void* spanNeedless_tail = static_cast<char*>(static_cast<void*>(spanNeedless)) + spanNeedlessSize;
-        spans_tail.insert(std::make_pair(spanNeedless_tail, spanNeedless));
-        return span;
+        void* spanReturn = nullptr;
+        spanSize = spanSize - size;
+        spanReturn = static_cast<char*>(span) + spanSize;
+        if (span == spanReturn)
+        {
+            spans_head.erase(span);
+            return spanReturn;
+        }
+        static_cast<Span*>(span)->size = spanSize;
+        spans_tail.insert(std::make_pair(static_cast<char*>(span) + spanSize, static_cast<Span*>(span)));
+        spans[spanSize / EACH_PAGE_SIZE - 1].add(static_cast<Span*>(span));
+        return spanReturn;
     }
 
     void PageCache::deallocate(void* ptr, size_t objSize)

@@ -113,7 +113,7 @@ namespace MemoryPool
             assert(ptr != nullptr && "ptr is nullptr");
             const size_t slotNum = (objSize + (ALIGN * mul) - 1) / (ALIGN * mul) - 1;
             MemoryPool* pool = pools[slotNum]->deallocate(ptr);
-            if (pools[slotNum]->deallocate(ptr))
+            if (pool)
             {
                 // 内存池已空，释放资源
                 deallocatePool(pool);

@@ -19,10 +19,15 @@ namespace MemoryPool
         CentralCache() = default;
         MemoryPool* allocatePool(const size_t objSize) override
         {
-            auto* slot = static_cast<char*>(PageCache::getCache()->allocate(objSize * EACH_POOL_SLOT_NUM));
+            size_t totalSize = objSize * EACH_POOL_SLOT_NUM;
+            if (totalSize % EACH_PAGE_SIZE != 0)
+            {
+                totalSize = (totalSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+            }
+            auto* slot = static_cast<char*>(PageCache::getCache()->allocate(totalSize));
             if (slot == nullptr)
                 return nullptr;
-            const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM, objSize);
+            const auto pool = new MemoryPool(slot, totalSize, objSize);
             pools[objSize / (ALIGN * mul) - 1]->addPool(pool);
             return pool;
         }

@@ -25,8 +25,8 @@ namespace MemoryPool
         MemoryPool* allocatePool(const size_t objSize) override
         {
             //@TODO: 对CentralCache的支持
-            auto* slot = static_cast<char*>(std::malloc(objSize * EACH_POOL_SLOT_NUM));
-            // char* slot = CentralCache::getCache()->allocate(slotSize * EACH_POOL_SLOT_NUM);
+            //auto* slot = static_cast<char*>(std::malloc(objSize * EACH_POOL_SLOT_NUM));
+            char* slot = static_cast<char*>(CentralCache::getCache()->allocate(objSize * EACH_POOL_SLOT_NUM));
             if (slot == nullptr)
                 return nullptr;
             const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM, objSize);
@@ -37,8 +37,8 @@ namespace MemoryPool
         void deallocatePool(MemoryPool* pool) override
         {
             //@TODO: 对CentralCache的支持
-            std::free(pool->getFirstPtr());
-            // CentralCache::getCache()->deallocate(pool->getFirstPtr(), pool->getPoolSize());
+            //std::free(pool->getFirstPtr());
+            CentralCache::getCache()->deallocate(pool->getFirstPtr(), pool->getPoolSize());
             delete pool;
         }
 
