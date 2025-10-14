@@ -24,7 +24,24 @@ namespace MemoryPool
 
     void CentralCache::deallocatePool(MemoryPool* pool)
     {
-        PageCache::getCache()->deallocate(pool->getFirstPtr(), pool->getPoolSize());
+        size_t totalSize = pool->getPoolSize();
+        if (totalSize % EACH_PAGE_SIZE != 0)
+        {
+            totalSize = (totalSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+        }
+        PageCache::getCache()->deallocate(pool->getFirstPtr(), totalSize);
         delete pool;
+    }
+
+    void* CentralCache::allocate(size_t objSize)
+    {
+        std::lock_guard lock(mutex_);
+        void* ptr = CacheBase::allocate(objSize);
+        return ptr;
+    }
+    void CentralCache::deallocate(void* ptr, size_t objSize)
+    {
+        std::lock_guard lock(mutex_);
+        CacheBase::deallocate(ptr, objSize);
     }
 } // namespace MemoryPool

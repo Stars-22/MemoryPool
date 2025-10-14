@@ -16,6 +16,8 @@ namespace MemoryPool
     private:
         friend struct GlobalStorage;
         CentralCache() = default;
+        //@OPTIMIZE: 把此互斥锁删掉
+        std::mutex mutex_;
 
         MemoryPool* allocatePool(size_t objSize) override;
         void deallocatePool(MemoryPool* pool) override;
@@ -25,6 +27,9 @@ namespace MemoryPool
         CentralCache(const CentralCache&) = delete;
         CentralCache& operator=(const CentralCache&) = delete;
         ~CentralCache() override { cleanup(); }
+
+        void* allocate(size_t objSize) override;
+        void deallocate(void* ptr, size_t objSize) override;
     };
 } // namespace MemoryPool
 
