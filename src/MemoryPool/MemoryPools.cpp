@@ -32,8 +32,9 @@ namespace MemoryPool
 
     MemoryPool* MemoryPools::deallocate(void* ptr)
     {
-        const auto it = poolsMap.lower_bound(static_cast<char*>(ptr));
-        assert(it != poolsMap.end() && "pool is nullptr");
+        auto it = poolsMap.upper_bound(static_cast<char*>(ptr));
+        assert(it != poolsMap.begin() && "pool is nullptr");
+        --it;
         if (MemoryPool* pool = it->second; pool->deallocate(ptr))
         {
             if (pool != firstPool)

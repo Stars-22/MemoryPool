@@ -5,9 +5,9 @@
 #ifndef MEMORYPOOL_PAGECACHE_H
 #define MEMORYPOOL_PAGECACHE_H
 
-#include <array>
-#include <unordered_map>
+#include <mutex>
 #include "../config.h"
+#include "SpansController.h"
 
 namespace MemoryPool
 {
@@ -15,29 +15,11 @@ namespace MemoryPool
     class PageCache
     {
     private:
-        struct Span
-        {
-            size_t size;
-            Span* prev = nullptr;
-            Span* next = nullptr;
-            explicit Span(const size_t size) : size(size) {}
-            ~Span();
-        };
-        struct Spans
-        {
-            Span* first = nullptr;
-            Span* last = nullptr;
-            Span* get();
-            void add(Span* span);
-        };
-        friend struct Span;
-
         static PageCache* cache;
-        std::array<Spans, MAX_PAGE_NUM> spans;
-        std::unordered_map<void*, Span*> spans_head;
-        std::unordered_map<void*, Span*> spans_tail;
+        std::mutex mutex_;
+        SpansController spansController;
 
-        PageCache() {}
+        PageCache() = default;
         static void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
         static void deallocateToSystem(void* ptr);
 

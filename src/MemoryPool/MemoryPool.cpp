@@ -17,7 +17,8 @@ namespace MemoryPool
         // 断言，如果块的数量小于1，则抛出异常
         assert(slotAmount > 0 && "Pool size too small for even one slot");
         // 断言，如果块的大小不是slot大小的倍数，则抛出异常
-        assert(poolSize % slotSize == 0 && "Pool size must be multiple of slot size");
+        //@TODO: 是否需要断言？
+        //assert(poolSize % slotSize == 0 && "Pool size must be multiple of slot size");
 
         lastPtr = firstPtr + poolSize - slotSize;
         freeSlot = nullptr;
