@@ -2,7 +2,7 @@
 // Created by stars on 2025/10/14.
 //
 
-#include "../include/MemoryPool/SpansController.h"
+#include "../../include/MemoryPool/SpansController.h"
 #include <cstring>
 
 namespace MemoryPool
@@ -32,19 +32,15 @@ namespace MemoryPool
 
     void SpansController::Spans::remove(const Span* span)
     {
-        if (span->prev)
-            span->prev->next = span->next;
-        if (span->next)
-            span->next->prev = span->prev;
-        if (!span->prev && !span->next)
-        {
-            first = nullptr;
-        }
+        if (span == first) first = span->next;
+        if (span == last) last = span->prev;
+        if (span->prev) span->prev->next = span->next;
+        if (span->next) span->next->prev = span->prev;
     }
 
     void SpansController::add(void* ptr, size_t size)
     {
-        memset(ptr, 0, size);
+        //memset(ptr, 0, size);
         auto* span = new (ptr) Span(size);
         spans_head[ptr] = span;
         spans_tail[static_cast<char*>(ptr) + size] = span;

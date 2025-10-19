@@ -32,6 +32,7 @@ namespace MemoryPool
 
     MemoryPool* MemoryPools::deallocate(void* ptr)
     {
+        bool a = poolsMap.empty();
         auto it = poolsMap.upper_bound(static_cast<char*>(ptr));
         assert(it != poolsMap.begin() && "pool is nullptr");
         --it;
@@ -40,7 +41,8 @@ namespace MemoryPool
             if (pool != firstPool)
             {
                 pool->prevPool->nextPool = pool->nextPool;
-                pool->nextPool->prevPool = pool->prevPool;
+                if (pool->nextPool != nullptr)
+                    pool->nextPool->prevPool = pool->prevPool;
             }
             else
             {

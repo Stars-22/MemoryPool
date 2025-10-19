@@ -41,6 +41,6 @@ namespace MemoryPool
         {
             PageCache::getCache()->deallocate(ptr, objSize);
         }
-        CacheBase::deallocate(ptr, objSize);
+        else CacheBase::deallocate(ptr, objSize);
     }
 } // namespace MemoryPool

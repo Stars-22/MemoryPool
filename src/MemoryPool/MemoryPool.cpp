@@ -58,7 +58,7 @@ namespace MemoryPool
     bool MemoryPool::deallocate(void* ptr)
     {
         // 检查指针是否在分配的内存范围内
-        assert(ptr >= firstPtr && ptr < lastPtr && "Pointer out of range");
+        assert(ptr >= firstPtr && ptr <= lastPtr && "Pointer out of range");
         // 检查指针是否对齐到槽大小(slot size)
         assert((static_cast<char*>(ptr) - firstPtr) % slotSize == 0 && "Pointer not aligned to slot size");
         // 检查是否有已使用的槽位
