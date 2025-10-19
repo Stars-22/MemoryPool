@@ -23,6 +23,7 @@ file(GLOB_RECURSE COMMON_SOURCES
 # 从公共源文件中排除main.cpp和test.cpp
 list(FILTER COMMON_SOURCES EXCLUDE REGEX ".*main\\.cpp$")
 list(FILTER COMMON_SOURCES EXCLUDE REGEX ".*test\\.cpp$")
+list(FILTER COMMON_SOURCES EXCLUDE REGEX ".*test1\\.cpp$")
 
 # 创建共享库（包含所有公共源文件）
 add_library(MemoryPool_common STATIC ${COMMON_SOURCES})
@@ -35,12 +36,16 @@ target_link_libraries(MemoryPool_main MemoryPool_common)
 # 创建测试程序可执行文件
 add_executable(MemoryPool_test src/test.cpp)
 target_link_libraries(MemoryPool_test MemoryPool_common)
+# 创建测试程序可执行文件
+add_executable(MemoryPool_test1 src/test1.cpp)
+target_link_libraries(MemoryPool_test1 MemoryPool_common)
 
 # 添加编译选项
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(MemoryPool_common PRIVATE -Wall -Wextra -pedantic)
     target_compile_options(MemoryPool_main PRIVATE -Wall -Wextra -pedantic)
     target_compile_options(MemoryPool_test PRIVATE -Wall -Wextra -pedantic)
+    target_compile_options(MemoryPool_test1 PRIVATE -Wall -Wextra -pedantic)
 endif()
 
 ## 可选：为测试目标添加DEBUG宏定义
