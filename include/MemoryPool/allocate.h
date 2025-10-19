@@ -8,6 +8,11 @@
 #include "ThreadCache.h"
 //@TODO: 智能指针接口
 
+
+inline void* allocate(size_t size) { return MemoryPool::ThreadCache::getCache()->allocate(size); }
+
+inline void deallocate(void* ptr, size_t size) { MemoryPool::ThreadCache::getCache()->deallocate(ptr, size); }
+
 /**
  * @brief 从内存池分配并构造单个对象
  * @tparam T 要分配的对象类型
@@ -16,7 +21,7 @@
  * @return 指向新构造对象的指针，失败时返回nullptr
  */
 template <typename T, typename... Args>
-T* allocate(Args&&... args)
+T* newObj(Args&&... args)
 {
     using namespace MemoryPool;
     T* ptr = static_cast<T*>(ThreadCache::getCache()->allocate(sizeof(T)));
@@ -32,7 +37,7 @@ T* allocate(Args&&... args)
  * @param ptr 指向要释放对象的指针
  */
 template <typename T>
-void deallocate(T* ptr)
+void deleteObj(T* ptr)
 {
     using namespace MemoryPool;
     assert(ptr != nullptr && "ptr is nullptr");

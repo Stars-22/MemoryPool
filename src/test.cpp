@@ -1,10 +1,7 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-
 #include "../include/MemoryPool/allocate.h"
-
-using namespace MemoryPool;
 
 // 测试用例
 class P1
@@ -41,14 +38,14 @@ void BenchmarkMemoryPool(size_t ntimes, size_t nworks, size_t rounds)
 				size_t begin1 = clock();
 				for (size_t i = 0; i < ntimes; i++)
 				{
-                    P1* p1 = allocate<P1>(); // 内存池对外接口
-                    deallocate<P1>(p1);
-                    P2* p2 = allocate<P2>();
-                    deallocate<P2>(p2);
-                    P3* p3 = allocate<P3>();
-                    deallocate<P3>(p3);
-                    P4* p4 = allocate<P4>();
-                    deallocate<P4>(p4);
+                    P1* p1 = newObj<P1>(); // 内存池对外接口
+                    deleteObj<P1>(p1);
+                    P2* p2 = newObj<P2>();
+                    deleteObj<P2>(p2);
+                    P3* p3 = newObj<P3>();
+                    deleteObj<P3>(p3);
+                    P4* p4 = newObj<P4>();
+                    deleteObj<P4>(p4);
 				}
 				size_t end1 = clock();
 

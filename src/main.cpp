@@ -27,21 +27,21 @@ ostream& operator<<(ostream& os, const S1& s)
 int main()
 {
 
-    int* a = allocate<int>(100000000);
+    int* a = newObj<int>(100000000);
     cout << *a << endl;
 
-    int* c = allocate<int>();
+    int* c = newObj<int>();
     *c = 10;
     cout << *c << endl;
 
     int* d[10];
     for (int i = 0; i < 10; i++)
     {
-        d[i] = allocate<int>(i);
+        d[i] = newObj<int>(i);
     }
 
     // 从内存池分配一个S1对象大小的空间，并使用构造函数参数初始化
-    S1* b = allocate<S1>(100, 101, 102);
+    S1* b = newObj<S1>(100, 101, 102);
     cout << sizeof(*b) << endl;
     cout << *b << endl;
 
