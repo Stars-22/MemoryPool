@@ -3,7 +3,7 @@
 //
 
 #include "../../include/MemoryPool/SpansController.h"
-#include <cstring>
+#include "MemoryPool/PageCache.h"
 
 namespace MemoryPool
 {
@@ -40,9 +40,8 @@ namespace MemoryPool
 
     void SpansController::add(void* ptr, size_t size)
     {
-        //memset(ptr, 0, size);
         auto* span = new (ptr) Span(size);
-        spans_head[ptr] = span;
+        if (!PageCache::getCache()->isHead(ptr)) spans_head[ptr] = span;
         spans_tail[static_cast<char*>(ptr) + size] = span;
         spans[size / EACH_PAGE_SIZE - 1].add(span);
     }
@@ -91,11 +90,14 @@ namespace MemoryPool
     void* SpansController::rtn(void* ptr, size_t size)
     {
         char* ptr_char = static_cast<char*>(ptr);
-        if (Span* span_left = getFindTail(ptr); span_left != nullptr)
+        if (!PageCache::getCache()->isHead(ptr))
         {
-            size += span_left->size;
-            ptr = span_left;
-            span_left->~Span();
+            if (Span* span_left = getFindTail(ptr); span_left != nullptr)
+            {
+                size += span_left->size;
+                ptr = span_left;
+                span_left->~Span();
+            }
         }
         if (Span* span_right = getFindHead(ptr_char + size); span_right != nullptr)
         {

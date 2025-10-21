@@ -6,6 +6,7 @@
 #define MEMORYPOOL_PAGECACHE_H
 
 #include <mutex>
+#include <unordered_set>
 #include "../config.h"
 #include "SpansController.h"
 
@@ -17,11 +18,12 @@ namespace MemoryPool
     private:
         std::mutex mutex_;
         SpansController spansController;
+        std::unordered_set<void*> system_blocks;
 
         PageCache() = default;
-        ~PageCache();
-        static void* allocateFromSystem(size_t size = MAX_PAGE_NUM * EACH_PAGE_SIZE);
-        static void deallocateToSystem(void* ptr);
+        ~PageCache() = default;
+        void* allocateFromSystem(size_t size = MAX_PAGE_NUM * EACH_PAGE_SIZE);
+        void deallocateToSystem(void* ptr);
 
     public:
         PageCache(const PageCache&) = delete;
@@ -30,6 +32,7 @@ namespace MemoryPool
         static PageCache* getCache();
         void* allocate(size_t size);
         void deallocate(void* ptr, size_t objSize);
+        bool isHead(void* ptr) const;
     };
 
 } // namespace MemoryPool

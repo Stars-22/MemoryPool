@@ -8,20 +8,6 @@
 
 namespace MemoryPool
 {
-    PageCache::~PageCache()
-    {
-        //@TODO: 这里是否需要析构？
-        // for (size_t i = 0; i < MAX_PAGE_NUM; i++)
-        // {
-        //     Span* temp = spans[i].first;
-        //     while (temp != nullptr)
-        //     {
-        //         Span* span = temp;
-        //         temp = temp->next;
-        //         deallocate(span, (i + 1) * EACH_PAGE_SIZE);
-        //     }
-        // }
-    }
 
     PageCache* PageCache::getCache()
     {
@@ -66,8 +52,18 @@ namespace MemoryPool
     void* PageCache::allocateFromSystem(size_t size)
     {
         //@OPTIMIZE:页对齐分配内存
-        return std::malloc(size);
+        void* block = std::malloc(size);
+        if (block) {
+            system_blocks.insert(block);  // 记录分配的块
+        }
+        return block;
     }
 
-    void PageCache::deallocateToSystem(void* ptr) { free(ptr); }
+    void PageCache::deallocateToSystem(void* ptr)
+    {
+        system_blocks.erase(ptr);
+        free(ptr);
+    }
+
+    bool PageCache::isHead(void* ptr) const { return system_blocks.count(ptr) > 0; }
 } // namespace MemoryPool

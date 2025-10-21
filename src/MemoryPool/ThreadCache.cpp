@@ -26,10 +26,14 @@ namespace MemoryPool
         delete pool;
     }
 
-    void* ThreadCache::allocate(const size_t objSize)
+    void* ThreadCache::allocate(size_t objSize)
     {
         if (objSize > MAX_SLOT_SIZE)
         {
+            if (objSize % EACH_PAGE_SIZE != 0)
+            {
+                objSize = (objSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+            }
             return PageCache::getCache()->allocate(objSize);
         }
         return CacheBase::allocate(objSize);
