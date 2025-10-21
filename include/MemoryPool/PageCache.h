@@ -15,13 +15,12 @@ namespace MemoryPool
     class PageCache
     {
     private:
-        static PageCache* cache;
         std::mutex mutex_;
         SpansController spansController;
 
         PageCache() = default;
         ~PageCache();
-        static void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
+        static void* allocateFromSystem(size_t size = MAX_PAGE_NUM * EACH_PAGE_SIZE);
         static void deallocateToSystem(void* ptr);
 
     public:

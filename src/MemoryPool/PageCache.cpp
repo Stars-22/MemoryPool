@@ -8,8 +8,6 @@
 
 namespace MemoryPool
 {
-    PageCache* PageCache::cache = new PageCache();
-
     PageCache::~PageCache()
     {
         //@TODO: 这里是否需要析构？
@@ -25,7 +23,11 @@ namespace MemoryPool
         // }
     }
 
-    PageCache* PageCache::getCache() { return cache; }
+    PageCache* PageCache::getCache()
+    {
+        static PageCache cache;
+        return &cache;
+    }
 
     void* PageCache::allocate(size_t size)
     {
@@ -33,7 +35,7 @@ namespace MemoryPool
         size_t pageNum = (size - 1) / EACH_PAGE_SIZE;
         if (pageNum > MAX_PAGE_NUM)
         {
-            return allocateFromSystem(pageNum);
+            return allocateFromSystem(size);
         }
         void* ptr = spansController.get(size);
         if (ptr == nullptr)
@@ -46,7 +48,10 @@ namespace MemoryPool
     void PageCache::deallocate(void* ptr, size_t objSize)
     {
         std::lock_guard lock(mutex_);
-        objSize = (objSize + EACH_PAGE_SIZE - 1) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+        if (objSize % EACH_PAGE_SIZE != 0)
+        {
+            objSize = (objSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+        }
         if (objSize >= EACH_PAGE_SIZE * MAX_PAGE_NUM)
         {
             deallocateToSystem(ptr);
@@ -58,10 +63,10 @@ namespace MemoryPool
         }
     }
 
-    void* PageCache::allocateFromSystem(size_t pageNum)
+    void* PageCache::allocateFromSystem(size_t size)
     {
         //@OPTIMIZE:页对齐分配内存
-        return std::malloc(EACH_PAGE_SIZE * pageNum);
+        return std::malloc(size);
     }
 
     void PageCache::deallocateToSystem(void* ptr) { free(ptr); }
