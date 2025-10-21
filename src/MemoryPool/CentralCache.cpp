@@ -25,10 +25,6 @@ namespace MemoryPool
     void CentralCache::deallocatePool(MemoryPool* pool)
     {
         size_t totalSize = pool->getPoolSize();
-        if (totalSize % EACH_PAGE_SIZE != 0)
-        {
-            totalSize = (totalSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
-        }
         PageCache::getCache()->deallocate(pool->getFirstPtr(), totalSize);
         delete pool;
     }

@@ -17,6 +17,7 @@ namespace MemoryPool
     private:
         friend struct ThreadLocalStorage;
         ThreadCache() = default;
+        ~ThreadCache() override { cleanup(); }
 
         MemoryPool* allocatePool(size_t objSize) override;
         void deallocatePool(MemoryPool* pool) override;
@@ -25,7 +26,6 @@ namespace MemoryPool
         constexpr static size_t mul = 1;
         ThreadCache(const ThreadCache&) = delete;
         ThreadCache& operator=(const ThreadCache&) = delete;
-        ~ThreadCache() override { cleanup(); }
 
         void* allocate(size_t objSize) override;
         void deallocate(void* ptr, size_t objSize) override;

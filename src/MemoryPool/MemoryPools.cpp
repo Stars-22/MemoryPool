@@ -32,7 +32,6 @@ namespace MemoryPool
 
     MemoryPool* MemoryPools::deallocate(void* ptr)
     {
-        bool a = poolsMap.empty();
         auto it = poolsMap.upper_bound(static_cast<char*>(ptr));
         assert(it != poolsMap.begin() && "pool is nullptr");
         --it;

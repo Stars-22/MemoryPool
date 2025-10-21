@@ -45,6 +45,7 @@ namespace MemoryPool
                 poolGroup = new Pools();
             }
         }
+        virtual ~CacheBase() = default;
 
         /**
          * @brief 分配一个新的内存池
@@ -75,7 +76,6 @@ namespace MemoryPool
     public:
         CacheBase(const CacheBase&) = delete;
         CacheBase& operator=(const CacheBase&) = delete;
-        virtual ~CacheBase() = default;
 
 
         /**

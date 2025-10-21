@@ -20,13 +20,13 @@ namespace MemoryPool
         SpansController spansController;
 
         PageCache() = default;
+        ~PageCache();
         static void* allocateFromSystem(size_t pageNum = MAX_PAGE_NUM);
         static void deallocateToSystem(void* ptr);
 
     public:
         PageCache(const PageCache&) = delete;
         PageCache& operator=(const PageCache&) = delete;
-        ~PageCache();
 
         static PageCache* getCache();
         void* allocate(size_t size);
