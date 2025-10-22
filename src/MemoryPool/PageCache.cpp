@@ -8,18 +8,16 @@
 
 namespace MemoryPool
 {
-
     PageCache* PageCache::getCache()
     {
         static PageCache cache;
         return &cache;
     }
 
-    void* PageCache::allocate(size_t size)
+    void* PageCache::allocate(const size_t size)
     {
         std::lock_guard lock(mutex_);
-        size_t pageNum = (size - 1) / EACH_PAGE_SIZE;
-        if (pageNum > MAX_PAGE_NUM)
+        if ((size - 1) / EACH_PAGE_SIZE > MAX_PAGE_NUM)
         {
             return allocateFromSystem(size);
         }

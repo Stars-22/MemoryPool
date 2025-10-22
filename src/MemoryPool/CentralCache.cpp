@@ -7,37 +7,29 @@
 
 namespace MemoryPool
 {
-    MemoryPool* CentralCache::allocatePool(const size_t objSize)
+    CentralCache::CentralCache() : pools{}
     {
-        size_t totalSize = objSize * EACH_POOL_SLOT_NUM;
-        if (totalSize % EACH_PAGE_SIZE != 0)
-        {
-            totalSize = (totalSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
-        }
-        auto* slot = static_cast<char*>(PageCache::getCache()->allocate(totalSize));
-        if (slot == nullptr)
-            return nullptr;
-        const auto pool = new MemoryPool(slot, totalSize, objSize);
-        pools[objSize / (ALIGN * mul) - 1]->addPool(pool);
-        return pool;
+        for (size_t i = 0; i < pools.size(); ++i)
+            pools[i] = new MemoryPools_Lock((i + 1) * EACH_POOL_SLOT_NUM * ALIGN);
+    }
+    CentralCache::~CentralCache()
+    {
+        for (auto& pool : pools)
+            delete pool;
     }
 
-    void CentralCache::deallocatePool(MemoryPool* pool)
+    CentralCache* CentralCache::getCache()
     {
-        size_t totalSize = pool->getPoolSize();
-        PageCache::getCache()->deallocate(pool->getFirstPtr(), totalSize);
-        delete pool;
+        static CentralCache cache;
+        return &cache;
     }
 
-    void* CentralCache::allocate(size_t objSize)
+    void* CentralCache::allocate(const size_t objSize) const
     {
-        std::lock_guard lock(mutex_);
-        void* ptr = CacheBase::allocate(objSize);
-        return ptr;
+        return pools[(objSize + ALIGN * EACH_POOL_SLOT_NUM - 1) / (ALIGN * EACH_POOL_SLOT_NUM) - 1]->allocate();
     }
-    void CentralCache::deallocate(void* ptr, size_t objSize)
+    void CentralCache::deallocate(void* ptr, const size_t objSize) const
     {
-        std::lock_guard lock(mutex_);
-        CacheBase::deallocate(ptr, objSize);
+        pools[(objSize + ALIGN * EACH_POOL_SLOT_NUM - 1) / (ALIGN * EACH_POOL_SLOT_NUM) - 1]->deallocate(ptr);
     }
 } // namespace MemoryPool

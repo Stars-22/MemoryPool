@@ -5,13 +5,14 @@
 
 #ifndef MEMORYPOOL_ALLOCATE_H
 #define MEMORYPOOL_ALLOCATE_H
+#include <cassert>
 #include "ThreadCache.h"
 //@TODO: 智能指针接口
 
 
-inline void* allocate(size_t size) { return MemoryPool::ThreadCache::getCache()->allocate(size); }
+inline void* allocate(const size_t size) { return MemoryPool::ThreadCache::getCache()->allocate(size); }
 
-inline void deallocate(void* ptr, size_t size) { MemoryPool::ThreadCache::getCache()->deallocate(ptr, size); }
+inline void deallocate(void* ptr, const size_t size) { MemoryPool::ThreadCache::getCache()->deallocate(ptr, size); }
 
 /**
  * @brief 从内存池分配并构造单个对象

@@ -6,29 +6,53 @@
 #ifndef MEMORYPOOL_THREADCACHE_H
 #define MEMORYPOOL_THREADCACHE_H
 
-#include "CacheBase.h"
+#include <array>
+#include "../../include/config.h"
 #include "MemoryPools.h"
 
 namespace MemoryPool
 {
     // 线程缓存类，用于管理线程本地的内存池
-    class ThreadCache final : public CacheBase<MemoryPools, ThreadCache, ThreadLocalStorage>
+    class ThreadCache
     {
     private:
-        friend struct ThreadLocalStorage;
-        ThreadCache() = default;
-        ~ThreadCache() override { cleanup(); }
+        std::array<MemoryPools*, MAX_SLOT_SIZE / ALIGN> pools; // 按块大小分组的内存池数组
+        ThreadCache();
+        ~ThreadCache();
 
-        MemoryPool* allocatePool(size_t objSize) override;
-        void deallocatePool(MemoryPool* pool) override;
+        /**
+         * @brief 分配一个新的内存池
+         * @param objSize 所需内存块的大小
+         * @return 返回新分配的内存池指针
+         */
+        [[nodiscard]] MemoryPool* allocatePool(size_t objSize) const;
+        /**
+         * @brief 释放内存池
+         * @param pool 要释放的内存池
+         */
+        static void deallocatePool(const MemoryPool* pool);
 
     public:
-        constexpr static size_t mul = 1;
         ThreadCache(const ThreadCache&) = delete;
         ThreadCache& operator=(const ThreadCache&) = delete;
 
-        void* allocate(size_t objSize) override;
-        void deallocate(void* ptr, size_t objSize) override;
+        /**
+         * @brief 获取当前线程的缓存实例
+         * @return 线程本地ThreadCache指针
+         */
+        static ThreadCache* getCache();
+        /**
+         * @brief 分配指定大小的内存
+         * @param objSize 要分配的字节数
+         * @return 分配的内存指针，失败返回nullptr
+         */
+        [[nodiscard]] void* allocate(size_t objSize) const;
+        /**
+         * @brief 释放内存
+         * @param ptr 要释放的内存指针
+         * @param objSize 内存大小
+         */
+        void deallocate(void* ptr, size_t objSize) const;
     };
 } // namespace MemoryPool
 

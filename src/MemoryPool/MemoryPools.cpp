@@ -4,9 +4,13 @@
 
 #include "../../include/MemoryPool/MemoryPools.h"
 #include <cassert>
+#include "../../include/MemoryPool/PageCache.h"
+#include "../../include/config.h"
 
 namespace MemoryPool
 {
+    MemoryPools::MemoryPools(const size_t size) : poolSize(size) {}
+
     MemoryPools::~MemoryPools()
     {
         poolsMap.clear();
@@ -62,9 +66,7 @@ namespace MemoryPool
         else
         {
             while (temp->nextPool != nullptr)
-            {
                 temp = temp->nextPool;
-            }
             temp->nextPool = pool;
             pool->prevPool = temp;
         }
@@ -72,21 +74,51 @@ namespace MemoryPool
     }
 
 
+    MemoryPools_Lock::MemoryPools_Lock(const size_t size) : MemoryPools(size) {}
+
     void* MemoryPools_Lock::allocate()
     {
         std::lock_guard lock(mutex_);
-        return MemoryPools::allocate();
+        void* obj = MemoryPools::allocate();
+        if (obj != nullptr)
+            return obj;
+        // 分配新内存池
+        MemoryPool* pool = allocatePool();
+        assert(pool != nullptr && "Failed to allocate pool");
+        if ((obj = pool->allocate()) != nullptr)
+            return obj;
+        return nullptr;
     }
 
-    MemoryPool* MemoryPools_Lock::deallocate(void* ptr)
+    void MemoryPools_Lock::deallocate(void* ptr)
     {
+        assert(ptr != nullptr && "ptr is nullptr");
         std::lock_guard lock(mutex_);
-        return MemoryPools::deallocate(ptr);
+        if (const MemoryPool* pool = MemoryPools::deallocate(ptr))
+            deallocatePool(pool);
     }
 
-    void MemoryPools_Lock::addPool(MemoryPool* pool)
+    void MemoryPools_Lock::addPool(MemoryPool* pool) { MemoryPools::addPool(pool); }
+
+    MemoryPool* MemoryPools_Lock::allocatePool()
     {
-        std::lock_guard lock(mutex_);
-        MemoryPools::addPool(pool);
+        size_t totalSize = poolSize * EACH_POOL_SLOT_NUM;
+        if (totalSize % EACH_PAGE_SIZE != 0)
+        {
+            totalSize = (totalSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;
+        }
+        auto* slot = static_cast<char*>(PageCache::getCache()->allocate(totalSize));
+        if (slot == nullptr)
+            return nullptr;
+        const auto pool = new MemoryPool(slot, totalSize, poolSize);
+        addPool(pool);
+        return pool;
+    }
+
+    void MemoryPools_Lock::deallocatePool(const MemoryPool* pool)
+    {
+        const size_t totalSize = pool->getPoolSize();
+        PageCache::getCache()->deallocate(pool->getFirstPtr(), totalSize);
+        delete pool;
     }
 } // namespace MemoryPool

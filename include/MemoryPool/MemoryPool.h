@@ -37,11 +37,11 @@ namespace MemoryPool
 
         /**
          * @brief 构造函数
-         * @param memoryBlock 内存块起始地址
+         * @param firstPtr 内存块起始地址
          * @param poolSize 内存池大小
          * @param slotSize 单个块大小
          */
-        MemoryPool(char* memoryBlock, size_t poolSize, size_t slotSize);
+        MemoryPool(char* firstPtr, size_t poolSize, size_t slotSize);
 
         ~MemoryPool() = default;
 

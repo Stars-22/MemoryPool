@@ -112,9 +112,9 @@ namespace MemoryPool
         return nullptr;
     }
 
-    void* SpansController::get(size_t size)
+    void* SpansController::get(const size_t size)
     {
-        size_t pageNum = size / EACH_PAGE_SIZE - 1;
+        const size_t pageNum = size / EACH_PAGE_SIZE - 1;
         if (Span* span = spans[pageNum].getFirst(); span != nullptr)
         {
             remove(span);
@@ -131,9 +131,9 @@ namespace MemoryPool
         return nullptr;
     }
 
-    void* SpansController::addAndCut(void* ptr, size_t needSize, size_t totalSize)
+    void* SpansController::addAndCut(void* ptr, const size_t needSize, const size_t totalSize)
     {
-        size_t spanSize = totalSize - needSize;
+        const size_t spanSize = totalSize - needSize;
         add(ptr, spanSize);
         return static_cast<char*>(ptr) + spanSize;
     }

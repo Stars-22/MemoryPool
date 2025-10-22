@@ -6,7 +6,6 @@
 #define MEMORYPOOL_SPANS_H
 
 #include <array>
-#include <cstddef>
 #include <unordered_map>
 #include "../config.h"
 
