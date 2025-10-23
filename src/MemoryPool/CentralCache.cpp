@@ -10,7 +10,7 @@ namespace MemoryPool
     CentralCache::CentralCache() : pools{}
     {
         for (size_t i = 0; i < pools.size(); ++i)
-            pools[i] = new MemoryPools_Lock((i + 1) * EACH_POOL_SLOT_NUM * ALIGN);
+            pools[i] = new MemoryPools_Lock((i + 1) * EACH_POOL_SLOT_NUM_Thread * ALIGN);
     }
     CentralCache::~CentralCache()
     {
@@ -26,10 +26,10 @@ namespace MemoryPool
 
     void* CentralCache::allocate(const size_t objSize) const
     {
-        return pools[(objSize + ALIGN * EACH_POOL_SLOT_NUM - 1) / (ALIGN * EACH_POOL_SLOT_NUM) - 1]->allocate();
+        return pools[(objSize + ALIGN * EACH_POOL_SLOT_NUM_Thread - 1) / (ALIGN * EACH_POOL_SLOT_NUM_Thread) - 1]->allocate();
     }
     void CentralCache::deallocate(void* ptr, const size_t objSize) const
     {
-        pools[(objSize + ALIGN * EACH_POOL_SLOT_NUM - 1) / (ALIGN * EACH_POOL_SLOT_NUM) - 1]->deallocate(ptr);
+        pools[(objSize + ALIGN * EACH_POOL_SLOT_NUM_Thread - 1) / (ALIGN * EACH_POOL_SLOT_NUM_Thread) - 1]->deallocate(ptr);
     }
 } // namespace MemoryPool

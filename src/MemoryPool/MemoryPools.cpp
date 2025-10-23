@@ -102,7 +102,7 @@ namespace MemoryPool
 
     MemoryPool* MemoryPools_Lock::allocatePool()
     {
-        size_t totalSize = poolSize * EACH_POOL_SLOT_NUM;
+        size_t totalSize = poolSize * EACH_POOL_SLOT_NUM_Central;
         if (totalSize % EACH_PAGE_SIZE != 0)
         {
             totalSize = (totalSize + EACH_PAGE_SIZE) / EACH_PAGE_SIZE * EACH_PAGE_SIZE;

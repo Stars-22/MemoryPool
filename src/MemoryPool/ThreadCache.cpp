@@ -35,10 +35,10 @@ namespace MemoryPool
 
     MemoryPool* ThreadCache::allocatePool(const size_t objSize) const
     {
-        auto* slot = static_cast<char*>(CentralCache::getCache()->allocate(objSize * EACH_POOL_SLOT_NUM));
+        auto* slot = static_cast<char*>(CentralCache::getCache()->allocate(objSize * EACH_POOL_SLOT_NUM_Thread));
         if (slot == nullptr)
             return nullptr;
-        const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM, objSize);
+        const auto pool = new MemoryPool(slot, objSize * EACH_POOL_SLOT_NUM_Thread, objSize);
         pools[objSize / ALIGN - 1]->addPool(pool);
         return pool;
     }

@@ -15,7 +15,6 @@ namespace MemoryPool
     class CentralCache
     {
     private:
-        constexpr static size_t mul = EACH_POOL_SLOT_NUM;
         std::array<MemoryPools_Lock*, MAX_SLOT_SIZE / ALIGN> pools; // 按块大小分组的内存池数组
         CentralCache();
         ~CentralCache();
